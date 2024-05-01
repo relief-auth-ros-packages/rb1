@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+
+<!-- This is a wrapper launcher for tuw_voronoi_graph/launch/demo_publish_graph.launch. -->
+<!-- Executing this launcher will create a voronoi graph of map `room` and              -->
+<!-- place its nodes in cultureid_rfid_following/config/feasible_goals_$(arg room).yaml -->
+<!-- These nodes are then picked up as feasible goals for the robot to navigate to.     -->
+<!-- Before running this launcher make sure that you have placed                        -->
+<!-- 1. The map (.pgm) and its corresponding .yaml file in                              -->
+<!--    tuw_multi_robot/tuw_voronoi_graph/cfg/maps/$(arg room)/map.{pgm,yaml}           -->
+<!-- 2. The `graph.yaml` configuration file in                                          -->
+<!--    tuw_multi_robot/tuw_voronoi_graph/cfg/graph/$(arg room)/                        -->
+<!-- E.G.:                                                                              -->
+<!-- You want to extract feasible goals for map csal_karto and save them.               -->
+<!-- You place csal_karto_0.02.pgm and csal_karto_0.02.yaml in                          -->
+<!-- tuw_multi_robot/tuw_voronoi_graph/cfg/maps/csal_karto                              -->
+<!-- and you rename them into map.pgm and map.yaml respectively                         -->
+<!-- Make sure to instruct map.yaml to point to map.pgm and make sure that map.yaml is  -->
+<!-- the one exactly used by map server, e.g. make sure that the origin points where    -->
+<!-- it should.                                                                         -->
+<!-- Then create directory tuw_multi_robot/tuw_voronoi_graph/cfg/graph/csal_karto/      -->
+<!-- and copy-paste from another homologous directory the graph.yaml configuration file.-->
+<!-- Tinker if needed (e.g. the robot's radius determines `map_inflation`).             -->
+
+<!-- CAUTION                                                                            -->
+<!-- It may very well be the case that a few of the output feasible goals may reside    -->
+<!-- in reality in infeasible locations, e.g. a goal may be located under a desk.       -->
+<!-- In order to eliminate these from execution, run this launcher, duplicate the       -->
+<!-- feasible_goals_$(arg room).yaml file, execute a `rostopic echo /initialpose`       -->
+<!-- and do a `provide an initial pose estimate` in rviz on infeasible configurations.  -->
+<!-- Find these in the duplicate file (the node updates the original periodically, and  -->
+<!-- the file is overwritten each time) and comment them out.                           -->
+
+
+<launch>
+
+  <include file="$(find tuw_voronoi_graph)/launch/demo_publish_graph.launch">
+    <arg name="room"                    value="csal_karto"   />
+    <arg name="launch_rviz"             value="true"         />
+    <arg name="launch_map_server"       value="true"         />
+    <arg name="launch_graph_generator"  value="true"         />
+    <arg name="cfg"                     value="default"      />
+    <arg name="load_map"                value=""             />
+  </include>
+
+</launch>

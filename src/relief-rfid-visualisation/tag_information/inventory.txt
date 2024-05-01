@@ -1,0 +1,8 @@
+Zeus,0,1
+Ulysses,0,1
+Ares,0,1
+unknown,0,1
+Poseidon,0,1
+Athena,0,1
+Hephaestus,0,1
+Hercules,0,1

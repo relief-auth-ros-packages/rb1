@@ -1,0 +1,6 @@
+<launch>
+
+    <node pkg ="rb1_base_beacon" type ="rb1_base_beacon_node.py" name ="rb1_base_beacon_node" output ="screen">
+    </node>
+
+</launch>

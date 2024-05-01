@@ -1,0 +1,9 @@
+<launch>
+  <env name="ROSCONSOLE_FORMAT" value="[${severity}][${thread}][${node}/${function}:${line}]: ${message}"/>
+
+  <node pkg="follow_waypoints" type="follow_waypoints" name="follow_waypoints" output="screen" clear_params="true">
+    <param name="goal_frame_id"               value="map"/>
+    <param name="waypoint_distance_tolerance" value="0.2"/>
+  </node>
+</launch>
+

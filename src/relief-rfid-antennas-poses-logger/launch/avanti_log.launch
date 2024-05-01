@@ -1,0 +1,28 @@
+<launch>
+
+  <arg name="robot_type" value="$(env ROBOT_TYPE)"/>
+
+  <arg name="velocity_topic" value="/robotnik_base_control/cmd_vel" if="$(eval arg('robot_type') == 'rb1')" />
+  <arg name="velocity_topic" value="/cmd_vel_mux/input/teleop"      if="$(eval arg('robot_type') == 'turtlebot')" />
+
+  <!-- Load param file (which readers/antennas are enabled, where are the antennas placed with respect to base_footprint) -->
+  <arg name="config_file" value="$(find relief_rfid_antennas_poses_logger)/config/params_rb1.yaml"       if="$(eval arg('robot_type') == 'rb1')"/>
+  <arg name="config_file" value="$(find relief_rfid_antennas_poses_logger)/config/params_turtlebot.yaml" if="$(eval arg('robot_type') == 'turtlebot')"/>
+
+  <!-- Commence logging of antennas' poses and robot velocity -->
+  <node name="logger_node" pkg="relief_rfid_antennas_poses_logger" type="logger_node">
+    <param name="pose_robot_filename"           value="$(find relief_rfid_antennas_poses_logger)/results/pose_robot.txt" />
+    <param name="pose_pipeline_robot_filename"  value="$(find relief_rfid_antennas_poses_logger)/results/pose_pipeline_robot.txt" />
+    <param name="pose_filename"                 value="$(find relief_rfid_antennas_poses_logger)/results/pose" />
+    <param name="pose_pipeline_filename"        value="$(find relief_rfid_antennas_poses_logger)/results/pose_pipeline" />
+    <param name="velocity_filename"             value="$(find relief_rfid_antennas_poses_logger)/results/velocities.txt" />
+    <param name="antennas_polarities_filename"  value="$(find relief_rfid_antennas_poses_logger)/results/antennas_polarities.txt" />
+    <param name="pose_topic"                    value="/amcl_pose" />
+    <param name="pose_pipeline_topic"           value="/relief_pipeline_localisation_node/icp_corrected_pose" />
+    <param name="velocity_topic"                value="$(arg velocity_topic)" />
+    <param name="robot_type"                    value="$(arg robot_type)" />
+
+    <rosparam command="load" file="$(arg config_file)" />
+  </node>
+
+</launch>

@@ -1,0 +1,38 @@
+<launch>
+
+  <!-- The map's name -->
+  <arg name="map_file" />
+  <arg name="resolution" />
+
+  <!-- Load the given map with the given resolution -->
+  <include file="$(find relief_devel)/launch/mapping/load_map.launch">
+    <arg name="map_file"        value="$(arg map_file)" />
+    <arg name="map_resolution"  value="$(arg resolution)" />
+  </include>
+
+
+  <!-- Initial position -->
+  <arg name="robot_type" />
+  <arg name="initial_pose_x" />
+  <arg name="initial_pose_y" />
+  <arg name="initial_pose_yaw" />
+
+  <!-- Launch amcl for localisation -->
+  <include file="$(find relief_devel)/launch/localisation/amcl.launch">
+    <!-- Map-specific. Check the specific .yaml file for correct origin
+         coordinates. Although the origin is at (0,0,0) upon the first
+         execution of map_save of the generated map, the yaml's origin
+         O(Ox, Oy, Oz) != (0,0,0). Then, assign:
+         initial_pose_x = -Ox
+         initial_pose_y = -Oy
+         Then, fix the yaml's origin at (0,0,0).
+    -->
+
+    <arg name="robot_type"        value="$(arg robot_type)" />
+
+    <arg name="initial_pose_x"    value="$(arg initial_pose_x)" />
+    <arg name="initial_pose_y"    value="$(arg initial_pose_y)" />
+    <arg name="initial_pose_yaw"  value="$(arg initial_pose_yaw)" />
+  </include>
+
+</launch>

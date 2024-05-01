@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>relief_rfid_detection</name>
+  <version>0.0.0</version>
+  <description>The relief-rdif-detection package</description>
+
+  <maintainer email="li9i@todo.todo">li9i</maintainer>
+
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+
+</package>

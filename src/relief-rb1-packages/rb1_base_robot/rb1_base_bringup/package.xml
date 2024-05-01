@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package>
+  <name>rb1_base_bringup</name>
+  <version>0.0.0</version>
+  <description>The rb1_base_bringup package</description>
+
+  <maintainer email="info@robotnik.es">Robotnik</maintainer>
+
+  <license>BSD</license>
+
+  <!-- <url type="website">http://wiki.ros.org/rb1_base_bringup</url> -->
+  <author email="info@robotnik.es">Robotnik</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>std_srvs</build_depend>
+  <build_depend>tf</build_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>std_srvs</run_depend>
+  <run_depend>tf</run_depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

@@ -1,0 +1,7 @@
+<library path="lib/librelief_rfid_image_publisher">
+
+  <class name="relief_rfid_image_publisher/relief_rfid_image_publisher" type="relief_rfid_image_publisher::ReliefRFIDImagePublisherNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to publish sensor_msgs/Image for project RELIEF</description>
+  </class>
+
+</library>

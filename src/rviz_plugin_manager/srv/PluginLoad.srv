@@ -1,0 +1,16 @@
+string plugin_class
+string plugin_name
+string plugin_topic
+string plugin_data_type
+string plugin_config
+
+---
+
+# return plugin unique identifier or -1 on error
+int64 plugin_uid
+
+# return call status
+#   0: success 
+#  -1: error
+int16 code     
+string message

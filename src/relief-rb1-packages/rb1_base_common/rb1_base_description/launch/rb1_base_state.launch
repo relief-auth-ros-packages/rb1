@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="version"/>
+  <arg name="prefix"/>
+
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find rb1_base_description)/robots/versions/$(arg version)' prefix:=$(arg prefix)" />
+
+  <!-- publish tfs through the robot_state_publisher -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+</launch>

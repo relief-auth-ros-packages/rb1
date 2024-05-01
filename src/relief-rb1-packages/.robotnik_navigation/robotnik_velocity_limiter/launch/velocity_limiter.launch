@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="sim" default="false"/>
+  <arg name="cmd_vel" default="robotnik_base_control/cmd_vel"/>
+  <arg name="prefix" default="rb2_"/>
+  <arg name="launch_robot_localization" default="false"/>
+  <arg name="has_elevator" default="false"/>
+  
+  <node pkg="robotnik_velocity_limiter" type="velocity_limiter_node" name="twist_limiter" output="screen">
+    <remap from="cmd_vel_in" to="~cmd_vel_in" />
+    <remap from="cmd_vel_out" to="~cmd_vel_out" />
+    <rosparam command="load" file="$(find robotnik_velocity_limiter)/config/twist_limiter.yaml" /> 
+  </node>
+  
+</launch>

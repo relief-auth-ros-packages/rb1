@@ -1,0 +1,36 @@
+<launch>
+
+  <arg name="use_images"                        value="false" />
+  <arg name="bookcase_corners_coords_file"      value="$(find relief_rfid_visualisation)/params/bookcase_corner_coords.yaml" />
+  <arg name="hanger_coords_file"                value="$(find relief_rfid_visualisation)/params/hanger_coords.yaml" />
+  <arg name="decrease_height_categories"        value="$(find relief_rfid_visualisation)/params/decrease_height_categories.yaml" />
+  <!--include file="$(find rviz_plugin_manager)/launch/rviz_plugin_manager.launch"/-->
+
+  <arg name="list_inventory_topic"              value="list_inventory" />
+  <arg name="visualise_all_tags_topic"          value="visualise_all_tags" />
+  <arg name="visualise_no_tags_topic"           value="visualise_no_tags" />
+  <arg name="visualise_this_tag_topic"          value="visualise_this_tag" />
+  <arg name="visualise_this_tag_type_topic"     value="visualise_this_tag_type" />
+
+  <node name="relief_visualisation_node" pkg="relief_rfid_visualisation" type="relief_rfid_visualisation_node" output="screen">
+    <param name="rfid_locations_filename"       value="$(find relief_rfid_detection)/results/rfid_locations.txt" />
+    <param name="rfid_tag_info_filename"        value="$(find relief_rfid_visualisation)/tag_information/tag_info_mm.txt" />
+    <param name="rfid_tag_images_directory"     value="$(find relief_rfid_visualisation)/imgs" />
+    <param name="inventory_filename"            value="$(find relief_rfid_visualisation)/tag_information/inventory.txt" />
+    <param name="callback_period"               value="2.0" />
+    <param name="use_images"                    value="$(arg use_images)" />
+
+    <param name="list_inventory_topic"          value="$(arg list_inventory_topic)" />
+    <param name="visualise_all_tags_topic"      value="$(arg visualise_all_tags_topic)" />
+    <param name="visualise_no_tags_topic"       value="$(arg visualise_no_tags_topic)" />
+    <param name="visualise_this_tag_topic"      value="$(arg visualise_this_tag_topic)" />
+    <param name="visualise_this_tag_type_topic" value="$(arg visualise_this_tag_type_topic)" />
+
+    <rosparam file="$(arg bookcase_corners_coords_file)" command="load"/>
+    <rosparam file="$(arg hanger_coords_file)"           command="load"/>
+    <rosparam file="$(arg decrease_height_categories)"   command="load"/>
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" output="log" args="" />
+
+</launch>

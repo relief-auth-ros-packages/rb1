@@ -1,0 +1,38 @@
+localization:
+  args: id_robot:="/rb1_base"
+  autorun: true
+  command: roslaunch rb1_base_localization amcl.launch
+  killwith: ''
+  params: prefix:=rb1_base_
+  process: ''
+map_saver:
+  args: ''
+  command: rosrun map_server map_saver
+  default_map: treshabitaciones
+  killwith: ''
+  maps_folder: /home/rb1/catkin_ws/src/map_nav_manager/map
+  params: ''
+  process: ''
+map_server:
+  args: ''
+  autorun: true
+  command: rosrun map_server map_server __name:=map_server
+  default_map: treshabitaciones
+  killwith: rosnode
+  maps_folder: /home/rb1/catkin_ws/src/map_nav_manager/map
+  params: _frame_id:=rb1_base_map
+  process: ''
+mapping:
+  args: id_robot:="/rb1_base" scan_topic:="front_laser/scan"
+  autorun: false
+  command: roslaunch rb1_base_localization gmapping.launch
+  killwith: ''
+  params: ''
+  process: ''
+navigation:
+  args: id_robot:="/rb1_base"
+  autorun: true
+  command: roslaunch rb1_base_navigation move_base.launch
+  killwith: ''
+  params: prefix:=rb1_base_
+  process: ''

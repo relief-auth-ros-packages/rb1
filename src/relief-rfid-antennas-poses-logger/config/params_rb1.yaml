@@ -1,0 +1,57 @@
+################################################################################
+reader_1:
+  sn: "001625127C5D"
+  active: true
+
+  antenna_1:
+    active: true
+    x: 0.0
+    y: 0.095
+    z: 0.633
+
+  antenna_2:
+    active: true
+    x: 0.0
+    y: 0.095
+    z: 1.073
+
+  antenna_3:
+    active: true
+    x: 0.0
+    y: 0.095
+    z: 1.528
+
+  antenna_4:
+    active: true
+    x: 0.0
+    y: 0.095
+    z: 1.928
+
+################################################################################
+reader_2:
+  sn: "001625127C5F"
+  active: true
+
+  antenna_1:
+    active: true
+    x: 0.0
+    y: -0.095
+    z: 0.633
+
+  antenna_2:
+    active: true
+    x: 0.0
+    y: -0.095
+    z: 1.073
+
+  antenna_3:
+    active: true
+    x: 0.0
+    y: -0.095
+    z: 1.528
+
+  antenna_4:
+    active: true
+    x: 0.0
+    y: -0.095
+    z: 1.928

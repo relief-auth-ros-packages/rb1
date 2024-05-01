@@ -1,0 +1,24 @@
+<package>
+  <name>rb1_teleop</name>
+  <version>2.4.2</version>
+  <description>Provides teleoperation using a keyboard.</description>
+  <maintainer email="mwise@willowgarage.com">Melonee Wise</maintainer>
+  <license>BSD</license>
+  <url type="website">http://ros.org/wiki/rb1_teleop</url>
+  <url type="repository">https://github.com/rb1/rb1</url>
+  <url type="bugtracker">https://github.com/rb1/rb1/issues</url>
+
+  <author email="mwise@willowgarage.com">Melonee Wise</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>joy</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>joy</run_depend>
+  <run_depend>kobuki_safety_controller</run_depend>
+  <run_depend>rb1_bringup</run_depend>
+</package>

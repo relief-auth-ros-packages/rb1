@@ -1,0 +1,44 @@
+<launch>
+
+  <node name="iv_rfid_compass_node" type="iv_rfid_compass_node.py" pkg="iv_rfid_compass" output="screen">
+
+    <!-- Measurements from the reader. The file is reset every `callback_period`
+         seconds. -->
+    <rosparam param="rfid_measurements_file"                  subst_value="True">
+      "$(find iv_rfid_compass)/application_java_001625127C5D/results_001625127C5D.txt"
+    </rosparam>
+
+    <!-- Since the measurements from the reader are reset every `callback_period`
+         seconds we store the measurements that the node handled in the
+        `rfid_measurements_file_readonly` file -->
+    <rosparam param="rfid_measurements_file_readonly"         subst_value="True">
+      "$(find iv_rfid_compass)/tmp/results_001625127C5D_all.txt"
+    </rosparam>
+
+    <!-- This is the actual input of the node. The file contains the
+         measurements taken in the period between two erasures -->
+    <rosparam param="rfid_measurements_file_working_copy"     subst_value="True">
+      "$(find iv_rfid_compass)/tmp/results_001625127C5D.txt"
+    </rosparam>
+
+    <rosparam param="tag_enumeration_file"                    subst_value="True">
+      "$(find iv_rfid_compass)/config/tags_enumeration.txt"
+    </rosparam>
+
+    <!-- The results of the node -->
+    <rosparam param="node_decisions"                          subst_value="True">
+      "$(find iv_rfid_compass)/results/decisions.txt"
+    </rosparam>
+
+    <!-- In line numbers in `tag_enumeration_file` -->
+    <param name="tag_to_seek"                                 value="13" />
+
+    <!-- In seconds -->
+    <param name="callback_period"                             value="2" />
+
+    <!-- -->
+    <param name="minimum_slope"                               value="-0.3" />
+
+  </node>
+
+</launch>

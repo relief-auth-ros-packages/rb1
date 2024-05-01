@@ -1,0 +1,14 @@
+# IO Topics
+odom_topic:           "/robotnik_base_control/odom"
+pose_estimate_topic:  "/odom_logger/pose_estimate"
+path_estimate_topic:  "/odom_logger/path_estimate"
+
+# Frames' parameters.
+# `init_frame_id` along with `odom_footprint` are created to serve as the
+# equivalent to what odom is to base footprint. What is published and logged
+# is `reference_frame_id` <-- odom_footprint
+global_frame_id:   'map'
+odom_frame_id:     'odom'
+base_frame_id:     'base_footprint'
+init_frame_id:     'odom_static'
+referent_frame_id: 'map'

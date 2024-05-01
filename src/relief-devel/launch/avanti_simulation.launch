@@ -1,0 +1,489 @@
+<launch>
+
+  <!-- Init args -->
+
+  <!-- Available values for robot_type: {turtlebot|rb1}-->
+  <arg name="robot_type"              value="$(env ROBOT_TYPE)" />
+
+  <!-- gzserver will be launched either way in simulation mode. Select launch of gzclient -->
+  <arg name="gazebo_gui"              default="false"/>
+
+  <!-- Available values for gazebo_world (speaks for itself): {corridor|willowgarage|playground|square|rectangle|rectangle_long|triangle|gamma|warehouse_karto|home_karto} -->
+  <arg name="gazebo_world"            default="fmt_home_karto2"/>
+
+  <!-- Available values for task: {localisation|mapping} -->
+  <arg name="task"                    default="localisation"/>
+
+  <!-- Available values for slam_alg: {karto|gmapping|rtabmap} -->
+  <arg name="slam_alg"                default="karto"     if="$(eval task == 'mapping')"/>
+
+  <!-- Number of cameras used for 3D SLAM -->
+  <arg name="num_cameras"             value="$(env NUM_CAMERAS)" />
+
+  <!-- The desired resolution of the map the slam_alg algorithm will produce -->
+  <arg name="slam_resolution"         default="0.01"      if="$(eval arg('task') == 'mapping' and (arg('slam_alg') == 'karto' or arg('slam_alg') == 'gmapping'))"/>
+  <arg name="slam_resolution"         default="0.01"      if="$(eval arg('task') == 'mapping' and arg('slam_alg') == 'rtabmap')"/>
+
+  <!-- Available values for gp (determines the global planner used): {navfn|globalplanner|sbpl} -->
+  <arg name="gp"                      default="globalplanner"/>
+
+  <!-- Available values for lp (determines the local planner used): {dwa|eband|teb} -->
+  <arg name="lp"                      default="teb"/>
+
+  <!-- Avalailable values for use_explorer: {true|false} -->
+  <arg name="use_explorer"            default="false" />
+
+  <!-- Avalailable values for use_viz {true|false} -->
+  <arg name="do_viz"                  default="true" />
+
+  <!-- If performing localisation (and therefore the map is known apriori),
+       set the map file name and its (given) resolution -->
+  <arg name="map_file"                default="$(arg gazebo_world)" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'corridor')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'corridor_rtabmap')" />
+  <arg name="map_resolution"          default="0.05"      if="$(eval map_file == 'willowgarage')" />
+  <arg name="map_resolution"          default="0.025"     if="$(eval map_file == 'square')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'rectangle')" />
+  <arg name="map_resolution"          default="0.025"     if="$(eval map_file == 'rectangle_long')" />
+  <arg name="map_resolution"          default="0.025"     if="$(eval map_file == 'triangle')" />
+  <arg name="map_resolution"          default="0.025"     if="$(eval map_file == 'gamma')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'home_karto')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'warehouse_karto')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'cylinder')" />
+
+
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'fmt_home_karto')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'fmt_home_karto2')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="map_resolution"          default="0.05"      if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'fmt_warehouse_karto')" />
+
+  <!-- Abstract the map's resolution for independence from task -->
+  <arg name="resolution"              value="$(arg map_resolution)"  if="$(eval task == 'localisation')" />
+  <arg name="resolution"              value="$(arg slam_resolution)" if="$(eval task == 'mapping')" />
+
+  <!-- The robot's initial position in gazebo and for localisation depending on the world/map -->
+  <arg name="real_initial_pose_x"       value="0"       if="$(eval map_file == 'corridor')" />
+  <arg name="real_initial_pose_y"       value="4"       if="$(eval map_file == 'corridor')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'corridor')" />
+  <arg name="estimate_initial_pose_x"   value="11.56"   if="$(eval map_file == 'corridor')" />
+  <arg name="estimate_initial_pose_y"   value="12.2"    if="$(eval map_file == 'corridor')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'corridor')" />
+
+  <arg name="real_initial_pose_x"       value="0"       if="$(eval map_file == 'corridor_rtabmap')" />
+  <arg name="real_initial_pose_y"       value="4"       if="$(eval map_file == 'corridor_rtabmap')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'corridor_rtabmap')" />
+  <arg name="estimate_initial_pose_x"   value="10.105"  if="$(eval map_file == 'corridor_rtabmap')" />
+  <arg name="estimate_initial_pose_y"   value="10.105"  if="$(eval map_file == 'corridor_rtabmap')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'corridor_rtabmap')" />
+
+  <arg name="real_initial_pose_x"       value="8.80"    if="$(eval map_file == 'willowgarage')" />
+  <arg name="real_initial_pose_y"       value="23.1"    if="$(eval map_file == 'willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="69.0"    if="$(eval map_file == 'willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="79.0"    if="$(eval map_file == 'willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'willowgarage')" />
+
+  <arg name="real_initial_pose_x"       value="0.0"     if="$(eval map_file == 'square')" />
+  <arg name="real_initial_pose_y"       value="0.0"     if="$(eval map_file == 'square')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'square')" />
+  <arg name="estimate_initial_pose_x"   value="11.4"    if="$(eval map_file == 'square')" />
+  <arg name="estimate_initial_pose_y"   value="11.4"    if="$(eval map_file == 'square')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'square')" />
+
+  <arg name="real_initial_pose_x"       value="0.0"     if="$(eval map_file == 'rectangle')" />
+  <arg name="real_initial_pose_y"       value="0.0"     if="$(eval map_file == 'rectangle')" />
+  <arg name="real_initial_pose_yaw"     value="0.00"    if="$(eval map_file == 'rectangle')" />
+  <arg name="estimate_initial_pose_x"   value="11.24"   if="$(eval map_file == 'rectangle')" />
+  <arg name="estimate_initial_pose_y"   value="11.24"   if="$(eval map_file == 'rectangle')" />
+  <arg name="estimate_initial_pose_yaw" value="0.00"    if="$(eval map_file == 'rectangle')" />
+
+  <arg name="real_initial_pose_x"       value="0.0"     if="$(eval map_file == 'rectangle_long')" />
+  <arg name="real_initial_pose_y"       value="0.0"     if="$(eval map_file == 'rectangle_long')" />
+  <arg name="real_initial_pose_yaw"     value="0.00"    if="$(eval map_file == 'rectangle_long')" />
+  <arg name="estimate_initial_pose_x"   value="12.2"    if="$(eval map_file == 'rectangle_long')" />
+  <arg name="estimate_initial_pose_y"   value="14.6"    if="$(eval map_file == 'rectangle_long')" />
+  <arg name="estimate_initial_pose_yaw" value="0.00"    if="$(eval map_file == 'rectangle_long')" />
+
+  <arg name="real_initial_pose_x"       value="0.0"     if="$(eval map_file == 'triangle')" />
+  <arg name="real_initial_pose_y"       value="0.0"     if="$(eval map_file == 'triangle')" />
+  <arg name="real_initial_pose_yaw"     value="0.00"    if="$(eval map_file == 'triangle')" />
+  <arg name="estimate_initial_pose_x"   value="16.2"    if="$(eval map_file == 'triangle')" />
+  <arg name="estimate_initial_pose_y"   value="11.4"    if="$(eval map_file == 'triangle')" />
+  <arg name="estimate_initial_pose_yaw" value="0.00"    if="$(eval map_file == 'triangle')" />
+
+  <arg name="real_initial_pose_x"       value="8.0"     if="$(eval map_file == 'gamma')" />
+  <arg name="real_initial_pose_y"       value="0.0"     if="$(eval map_file == 'gamma')" />
+  <arg name="real_initial_pose_yaw"     value="0.00"    if="$(eval map_file == 'gamma')" />
+  <arg name="estimate_initial_pose_x"   value="21.0"    if="$(eval map_file == 'gamma')" />
+  <arg name="estimate_initial_pose_y"   value="12.2"    if="$(eval map_file == 'gamma')" />
+  <arg name="estimate_initial_pose_yaw" value="0.00"    if="$(eval map_file == 'gamma')" />
+
+  <arg name="real_initial_pose_x"       value="-8.0"        if="$(eval map_file == 'home_karto')" />
+  <arg name="real_initial_pose_y"       value="-10.0"       if="$(eval map_file == 'home_karto')" />
+  <arg name="real_initial_pose_yaw"     value="-2.6"        if="$(eval map_file == 'home_karto')" />
+  <arg name="estimate_initial_pose_x"   value="2.613582"    if="$(eval map_file == 'home_karto')" />
+  <arg name="estimate_initial_pose_y"   value="2.422026"    if="$(eval map_file == 'home_karto')" />
+  <arg name="estimate_initial_pose_yaw" value="-2.6"        if="$(eval map_file == 'home_karto')" />
+
+  <arg name="real_initial_pose_x"       value="0.0"       if="$(eval map_file == 'warehouse_karto')" />
+  <arg name="real_initial_pose_y"       value="0.0"       if="$(eval map_file == 'warehouse_karto')" />
+  <arg name="real_initial_pose_yaw"     value="0.00"      if="$(eval map_file == 'warehouse_karto')" />
+  <arg name="estimate_initial_pose_x"   value="2.083190"  if="$(eval map_file == 'warehouse_karto')" />
+  <arg name="estimate_initial_pose_y"   value="3.015576"  if="$(eval map_file == 'warehouse_karto')" />
+  <arg name="estimate_initial_pose_yaw" value="0.00"      if="$(eval map_file == 'warehouse_karto')" />
+
+  <arg name="real_initial_pose_x"       value="0.0"       if="$(eval map_file == 'cylinder')" />
+  <arg name="real_initial_pose_y"       value="0.0"       if="$(eval map_file == 'cylinder')" />
+  <arg name="real_initial_pose_yaw"     value="0.00"      if="$(eval map_file == 'cylinder')" />
+  <arg name="estimate_initial_pose_x"   value="8.58615"   if="$(eval map_file == 'cylinder')" />
+  <arg name="estimate_initial_pose_y"   value="9.976414"  if="$(eval map_file == 'cylinder')" />
+  <arg name="estimate_initial_pose_yaw" value="0.00"      if="$(eval map_file == 'cylinder')" />
+
+
+  <!-- pose_1
+  <arg name="real_initial_pose_x"       value="0"       if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="real_initial_pose_y"       value="4"       if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="estimate_initial_pose_x"   value="11.56"   if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="estimate_initial_pose_y"   value="12.2"    if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_corridor')" />
+  -->
+
+  <!-- pose_2
+  <arg name="real_initial_pose_x"       value="0.5"     if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="real_initial_pose_y"       value="0.0"     if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="estimate_initial_pose_x"   value="12.06"   if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="estimate_initial_pose_y"   value="8.2"     if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_corridor')" />
+  -->
+
+  <!-- pose_3 -->
+  <arg name="real_initial_pose_x"       value="-3.5"    if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="real_initial_pose_y"       value="1.0"     if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="estimate_initial_pose_x"   value="8.06"    if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="estimate_initial_pose_y"   value="9.2"     if="$(eval map_file == 'fmt_corridor')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_corridor')" />
+
+  <!-- pose_1
+  <arg name="real_initial_pose_x"       value="-6.0"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="8.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="14.440000"   if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="24.040000"   if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  -->
+
+  <!-- pose_2
+  <arg name="real_initial_pose_x"       value="-2.6"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="8.8"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="17.840000"   if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="24.840000"   if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+   -->
+
+  <!-- pose_3
+  <arg name="real_initial_pose_x"       value="-5.44"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="-1.36"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="15.0"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="14.68"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  -->
+
+  <!-- pose_4
+  <arg name="real_initial_pose_x"       value="1.56"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="-1.82"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="22.00"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="14.22"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  -->
+
+  <!-- pose_5 -->
+  <arg name="real_initial_pose_x"       value="5.56"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="0.06"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="25.00"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="16.10"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+
+
+  <!-- pose_6
+  <arg name="real_initial_pose_x"       value="4.02"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="-6.36"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="24.46"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="9.68"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  -->
+
+  <!-- pose_7
+  <arg name="real_initial_pose_x"       value="-2.18"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="-5.02"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="18.26"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="11.02"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  -->
+
+  <!-- pose_8
+  <arg name="real_initial_pose_x"       value="5.20"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="-8.26"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="25.64"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="7.78"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  -->
+
+  <!-- pose_9
+  <arg name="real_initial_pose_x"       value="3.84"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="5.4"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="24.28"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="21.44"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  -->
+
+  <!-- pose_10
+  <arg name="real_initial_pose_x"       value="8.56"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="12.6"        if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="29.00"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="28.64"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  -->
+
+  <!-- pose_11
+  <arg name="real_initial_pose_x"       value="10.56"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_y"       value="-3.84"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_x"   value="31.00"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_y"   value="12.20"       if="$(eval map_file == 'fmt_home_karto3')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_home_karto3')" />
+  -->
+
+
+  <!-- pose_2
+  <arg name="real_initial_pose_x"       value="33.07681"    if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_y"       value="12.234424"   if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_x"   value="35.16"       if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_y"   value="15.25"       if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+   -->
+
+  <!-- pose_3
+  <arg name="real_initial_pose_x"       value="36.72681"    if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_y"       value="-1.334424"   if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_x"   value="38.81"       if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_y"   value="2.35"        if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  -->
+
+  <!-- pose_4
+  <arg name="real_initial_pose_x"       value="31.33681"    if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_y"       value="1.904424"    if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_x"   value="33.42"       if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_y"   value="4.92"        if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  -->
+
+  <!-- pose_5
+  <arg name="real_initial_pose_x"       value="14.99681"    if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_y"       value="5.734424"    if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_x"   value="17.08"       if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_y"   value="8.75"        if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  -->
+
+  <!-- pose_6
+  <arg name="real_initial_pose_x"       value="6.54681"     if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_y"       value="8.914424"    if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_x"   value="8.63"        if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_y"   value="11.93"       if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  -->
+
+  <!-- pose_7 -->
+  <arg name="real_initial_pose_x"       value="-1.18681"    if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_y"       value="6.484424"    if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="real_initial_pose_yaw"     value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_x"   value="1.27"        if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_y"   value="9.5"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'fmt_warehouse_karto')" />
+
+
+
+
+
+
+  <!-- pose_1
+  <arg name="real_initial_pose_x"       value="17.36"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_y"       value="-18.42"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"        if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="77.56"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="37.48"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"      if="$(eval map_file == 'fmt_willowgarage')" />
+  -->
+
+  <!-- pose_2
+  <arg name="real_initial_pose_x"       value="7.65"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_y"       value="11.0"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="67.85"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="66.90"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_willowgarage')" />
+  -->
+
+  <!-- pose_3
+  <arg name="real_initial_pose_x"       value="20.8"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_y"       value="1.7"     if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="81.0"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="57.6"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_willowgarage')" />
+  -->
+
+  <!-- pose_4
+  <arg name="real_initial_pose_x"       value="18.35"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_y"       value="22.5"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="78.55"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="78.35"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_willowgarage')" />
+  -->
+
+  <!-- pose_5
+  <arg name="real_initial_pose_x"       value="23.80"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_y"       value="22.3"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="84.0"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="78.15"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_willowgarage')" />
+  -->
+
+  <!-- pose_6
+  <arg name="real_initial_pose_x"       value="24.55"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_y"       value="0.81"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="84.75"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="56.65"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_willowgarage')" />
+  -->
+
+  <!-- pose_7
+  <arg name="real_initial_pose_x"       value="-9.05"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_y"       value="-11.19"  if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="51.15"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="44.65"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_willowgarage')" />
+  -->
+
+  <!-- pose_8
+  <arg name="real_initial_pose_x"       value="1.75"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_y"       value="-18.14"  if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="61.95"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="37.8"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_willowgarage')" />
+  -->
+
+  <!-- pose_9
+  <arg name="real_initial_pose_x"       value="2.0"     if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_y"       value="-18.18"  if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="62.2"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="37.76"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_willowgarage')" />
+  -->
+
+  <!-- pose_10 -->
+  <arg name="real_initial_pose_x"       value="-5.0"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_y"       value="-18.18"  if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="real_initial_pose_yaw"     value="0"       if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_x"   value="55.2"    if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_y"   value="37.76"   if="$(eval map_file == 'fmt_willowgarage')" />
+  <arg name="estimate_initial_pose_yaw" value="0.0"     if="$(eval map_file == 'fmt_willowgarage')" />
+
+
+  <!-- ********************************************************************* -->
+  <!-- Launch gazebo -->
+  <include file="$(find relief_devel)/launch/robot/gazebo.launch">
+    <arg name="gazebo_gui"            value="$(arg gazebo_gui)" />
+    <arg name="gazebo_world"          value="$(arg gazebo_world)" />
+  </include>
+
+  <!-- ********************************************************************* -->
+  <!-- Launch robot -->
+  <include file="$(find relief_devel)/launch/robot/$(arg robot_type)_bringup_simulation.launch">
+    <arg name="initial_pose_x"        value="$(arg real_initial_pose_x)" />
+    <arg name="initial_pose_y"        value="$(arg real_initial_pose_y)" />
+    <arg name="initial_pose_yaw"      value="$(arg real_initial_pose_yaw)" />
+    <arg name="num_cameras"           value="$(arg num_cameras)" />
+  </include>
+
+
+  <!-- ********************************************************************* -->
+  <!-- Launch either localisation or mapping -->
+  <include file="$(find relief_devel)/launch/$(arg task)/$(arg task).launch">
+    <arg name="robot_type"            value="$(arg robot_type)"/>
+    <arg name="resolution"            value="$(arg resolution)" />
+
+    <arg name="slam_alg"              value="$(arg slam_alg)"                   if="$(eval task == 'mapping')" />
+    <arg name="num_cameras"           value="$(arg num_cameras)"                if="$(eval task == 'mapping' and arg('slam_alg') == 'rtabmap')" />
+
+    <arg name="map_file"              value="$(arg map_file)"                   if="$(eval task == 'localisation')" />
+    <arg name="initial_pose_x"        value="$(arg estimate_initial_pose_x)"    if="$(eval task == 'localisation')" />
+    <arg name="initial_pose_y"        value="$(arg estimate_initial_pose_y)"    if="$(eval task == 'localisation')" />
+    <arg name="initial_pose_yaw"      value="$(arg estimate_initial_pose_yaw)"  if="$(eval task == 'localisation')" />
+
+  </include>
+
+  <!-- ********************************************************************* -->
+  <!-- Load navigation (move_base, global and local planner)-->
+  <include file="$(find relief_devel)/launch/navigation/navigation.launch" >
+    <arg name="robot_type"            value="$(arg robot_type)"/>
+    <arg name="gp"                    value="$(arg gp)"/>
+    <arg name="lp"                    value="$(arg lp)"/>
+    <arg name="task"                  value="$(arg task)"/>
+    <arg name="resolution"            value="$(arg resolution)" />
+  </include>
+
+  <!-- ********************************************************************* -->
+  <!-- Load frontier explorer -->
+  <group if="$(arg use_explorer)">
+    <include file="$(find relief_devel)/launch/exploration/frontier_exploration.launch">
+      <arg name="task"                  value="$(arg task)"/>
+    </include>
+
+    <!-- Run rviz marker replacement for triggering rviz-less exploration -->
+    <node pkg="relief_devel" name="marker_replacement_node" type="marker_replacement_node" output="screen" />
+  </group>
+
+  <!-- ********************************************************************* -->
+  <!-- Load visualisation -->
+  <node name="rviz" pkg="rviz" type="rviz" output="log" args="-d $(find relief_devel)/configuration_files/rviz/relief_devel_$(arg gp)_$(arg lp).rviz" if="$(arg do_viz)" />
+
+
+  <!-- ********************************************************************* -->
+  <!-- The 3D map's origin should be translated to the same values as that of
+       the 2D map; publish a fixed TF frame for the 3D map and feed it to
+       octomap as its frame_id -->
+  <node pkg="tf" type="static_transform_publisher" name="octomap_frame_id_broadcaster" args="$(arg estimate_initial_pose_x) $(arg estimate_initial_pose_y) 0 0 0 0 map octomap_frame_id 100" />
+
+  <arg name="map_3d" default="$(find relief_devel)/maps/$(arg map_file)_$(arg map_resolution).binvox.bt"/>
+  <node if="$(eval map_file == 'corridor_rtabmap')" pkg="octomap_server" type="octomap_server_node" name="octomap_server" output="screen" args="$(arg map_3d)">
+    <param name="frame_id" value="octomap_frame_id" />
+  </node>
+
+</launch>

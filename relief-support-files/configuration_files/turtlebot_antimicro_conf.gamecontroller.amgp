@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<joystick configversion="19" appversion="2.23">
+    <!--The SDL name for a joystick is included for informational purposes only.-->
+    <sdlname>Wireless Controller</sdlname>
+    <!--The GUID for a joystick is included for informational purposes only.-->
+    <guid>050000004c050000cc09000000810000</guid>
+    <sets>
+        <set index="1">
+            <axis index="1">
+                <throttle>normal</throttle>
+            </axis>
+            <axis index="2">
+                <throttle>normal</throttle>
+            </axis>
+            <axis index="3">
+                <throttle>positive</throttle>
+            </axis>
+            <axis index="4">
+                <throttle>normal</throttle>
+            </axis>
+            <axis index="5">
+                <throttle>normal</throttle>
+            </axis>
+            <axis index="6">
+                <throttle>positive</throttle>
+            </axis>
+            <button index="2">
+                <slots>
+                    <slot>
+                        <code>0x32</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="4">
+                <slots>
+                    <slot>
+                        <code>0x31</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="5">
+                <slots>
+                    <slot>
+                        <code>0x1000021</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+            <button index="7">
+                <slots>
+                    <slot>
+                        <code>0x1000023</code>
+                        <mode>keyboard</mode>
+                    </slot>
+                </slots>
+            </button>
+        </set>
+    </sets>
+</joystick>

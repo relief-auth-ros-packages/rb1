@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <arg name="room"                     default="csal_karto"   />
+  <arg name="launch_rviz"              default="true"         />
+  <arg name="launch_map_server"        default="true"         />
+  <arg name="launch_graph_generator"   default="true"         />
+  <arg name="cfg"                      default="default"      />
+  <arg name="load_map"                 default=""             />
+
+  <!-- map server -->
+  <group if="$(arg launch_map_server)">
+        <include file="$(find tuw_voronoi_graph)/launch/map_server.launch">
+        <arg name="room" value="$(arg room)" />
+        </include>
+  </group>
+
+  <!-- start rviz -->
+  <group if="$(arg launch_rviz)">
+	  <include file="$(find tuw_voronoi_graph)/launch/rviz.launch">
+	  </include>
+  </group>
+
+  <group if="$(arg launch_graph_generator)">
+	  <include file="$(find tuw_voronoi_graph)/launch/graph_generator.launch">
+	    <arg name="room" value="$(arg room)" />
+	    <!--arg name="custom_graph_path" value="$(find tuw_voronoi_graph)/cfg/graph/$(arg room)/cache/$(arg load_map)" /-->
+	    <arg name="custom_graph_path"       value="" />
+	    <arg name="graph_nodes_save_path"   value="$(find cultureid_rfid_following)/config/feasible_goals_$(arg room).yaml" />
+	  </include>
+  </group>
+
+</launch>

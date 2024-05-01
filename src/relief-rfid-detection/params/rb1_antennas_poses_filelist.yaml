@@ -1,0 +1,8 @@
+rfid_antennas_poses_filelist: ["/home/rb1/catkin_ws/src/relief-rfid-antennas-poses-logger/results/pose_reader_001625127C5D_antenna_1.txt",
+                               "/home/rb1/catkin_ws/src/relief-rfid-antennas-poses-logger/results/pose_reader_001625127C5D_antenna_2.txt",
+                               "/home/rb1/catkin_ws/src/relief-rfid-antennas-poses-logger/results/pose_reader_001625127C5D_antenna_3.txt",
+                               "/home/rb1/catkin_ws/src/relief-rfid-antennas-poses-logger/results/pose_reader_001625127C5D_antenna_4.txt",
+                               "/home/rb1/catkin_ws/src/relief-rfid-antennas-poses-logger/results/pose_reader_001625127C5F_antenna_1.txt",
+                               "/home/rb1/catkin_ws/src/relief-rfid-antennas-poses-logger/results/pose_reader_001625127C5F_antenna_2.txt",
+                               "/home/rb1/catkin_ws/src/relief-rfid-antennas-poses-logger/results/pose_reader_001625127C5F_antenna_3.txt",
+                               "/home/rb1/catkin_ws/src/relief-rfid-antennas-poses-logger/results/pose_reader_001625127C5F_antenna_4.txt"]

@@ -1,0 +1,11 @@
+update_frequency: 0.2
+publish_frequency: 1.0
+
+static:
+#Can pull data from gmapping, map_server or a non-rolling costmap
+  map_topic: /map
+#map_topic: move_base/global_costmap/costmap
+
+explore_boundary:
+#set to false for gmapping, true if re-exploring a known area
+  explore_clear_space: true

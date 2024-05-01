@@ -1,0 +1,8 @@
+image: csal_balcony_0.01.pgm
+resolution: 0.010000
+#origin: [-5.323089, -18.415756, 0.000000]
+origin: [0,0,0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

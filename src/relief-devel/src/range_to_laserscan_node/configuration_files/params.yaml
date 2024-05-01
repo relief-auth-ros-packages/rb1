@@ -1,0 +1,2 @@
+range_topic_in: front_sonar/range
+laserscan_topic_out: front_sonar/scan/range

@@ -1,0 +1,79 @@
+<launch>
+
+  <arg name="robot_type"          value="$(env ROBOT_TYPE)"/>
+
+  <!-- The tag to follow; its EPC -->
+  <arg name="EPC"                 value="E2003EA4E98A064A6181A68A"/>
+
+  <arg name="map_name" />
+
+  <!-- the global planner should always be global_planner -->
+  <!-- for the aoa_following AND FOR THE ROBOT -->
+  <arg name="gp" />
+
+  <arg name="map_resolution"      value="0.01"                if="$(eval map_name == 'corridor')" />
+  <arg name="map_resolution"      value="0.01"                if="$(eval map_name == 'home_karto')" />
+  <arg name="map_resolution"      value="0.01"                if="$(eval map_name == 'warehouse_karto')" />
+  <arg name="map_resolution"      value="0.02"                if="$(eval map_name == 'csal_karto')" />
+  <arg name="map_resolution"      value="0.01"                if="$(eval map_name == 'csal_balcony')" />
+  <arg name="map_directory"       value="$(find relief_devel)/maps" />
+
+  <arg name="callback_frequency"  value="1.0"/>
+  <arg name="free_goal_distance"  value="1.5"/>
+  <arg name="robot_position_to_goal_distance_threshold"  value="0.25"/>
+
+  <arg name="velocity_topic"      value="/robotnik_base_control/cmd_vel"                        if="$(eval arg('robot_type') == 'rb1')" />
+
+  <!-- turtlebot in autonomous mode -->
+  <arg name="velocity_topic"      value="/navigation_velocity_smoother/raw_cmd_vel"             if="$(eval arg('robot_type') == 'turtlebot')" />
+
+  <arg name="request_lost_tag_topic"  value="cultureid_rfid_following_rltt"/>
+  <arg name="lost_tag_detected_topic" value="cultureid_rfid_following_ltdt"/>
+
+
+  <arg name="scan_topic"          value="scan"                        if="$(eval robot_type == 'turtlebot')" />
+  <arg name="laser_z_orientation" value="upwards"                     if="$(eval robot_type == 'turtlebot')" />
+
+  <arg name="scan_topic"          value="front_laser/scan"            if="$(eval robot_type == 'rb1')" />
+  <arg name="laser_z_orientation" value="downwards"                   if="$(eval robot_type == 'rb1')" />
+
+  <!-- Load param file (which readers/antennas are enabled, where are the antennas placed with respect to base_footprint) -->
+  <arg name="config_file"    value="$(find cultureid_rfid_following)/config/params_rb1.yaml"       if="$(eval arg('robot_type') == 'rb1')"/>
+  <arg name="config_file"    value="$(find cultureid_rfid_following)/config/params_turtlebot.yaml" if="$(eval arg('robot_type') == 'turtlebot')"/>
+  <arg name="feasible_goals" value="$(find cultureid_rfid_following)/config/feasible_goals_$(arg map_name).yaml" />
+
+
+  <!--
+  -->
+  <node name="cultureid_rfid_aoa_server_node" pkg="cultureid_rfid_following" type="cultureid_rfid_aoa_server_node.py" output="screen">
+    <param name="rfid_measurements_file"        value="$(find cultureid_rfid_following)/results/results_001625127C5D.txt" />
+    <param name="bank_rfid_measurements_file"   value="$(find cultureid_rfid_following)/results/bank_results_001625127C5D.txt" />
+    <param name="epc"                           value="$(arg EPC)" />
+    <param name="request_lost_tag_topic"        value="$(arg request_lost_tag_topic)" />
+    <param name="lost_tag_detected_topic"       value="$(arg lost_tag_detected_topic)" />
+  </node>
+
+  <node name="cultureid_rfid_following_node" pkg="cultureid_rfid_following" type="cultureid_rfid_following_node" output="screen">
+    <param name="pose_robot_filename"                         value="$(find cultureid_rfid_following)/results/pose_robot.txt" />
+    <param name="goal_orientation_filename"                   value="$(find cultureid_rfid_following)/results/goal_orientation.txt" />
+    <param name="pose_filename"                               value="$(find cultureid_rfid_following)/results/pose" />
+    <param name="velocity_filename"                           value="$(find cultureid_rfid_following)/results/velocities.txt" />
+    <param name="antennas_polarities_filename"                value="$(find cultureid_rfid_following)/results/antennas_polarities.txt" />
+    <param name="pose_topic"                                  value="/amcl_pose" />
+    <param name="velocity_topic"                              value="$(arg velocity_topic)" />
+    <param name="robot_type"                                  value="$(arg robot_type)" />
+    <param name="callback_frequency"                          value="$(arg callback_frequency)" />
+    <param name="scan_topic"                                  value="$(arg scan_topic)" />
+    <param name="request_lost_tag_topic"                      value="$(arg request_lost_tag_topic)" />
+    <param name="lost_tag_detected_topic"                     value="$(arg lost_tag_detected_topic)" />
+    <param name="free_goal_distance"                          value="$(arg free_goal_distance)" />
+    <param name="robot_position_to_goal_distance_threshold"   value="$(arg robot_position_to_goal_distance_threshold)" />
+    <param name="laser_z_orientation"                         value="$(arg laser_z_orientation)" />
+    <param name="map_topic"                                   value="map" />
+    <param name="map_png_file"                                value="$(arg map_directory)/$(arg map_name)_$(arg map_resolution).png" />
+
+    <rosparam command="load" file="$(arg config_file)" />
+    <rosparam command="load" file="$(arg feasible_goals)" />
+  </node>
+
+  </launch>

@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- valid for rb1_base -->
+  <!-- The environment variables should be set in a file or .bashrc -->
+
+  <arg name="xacro_robot" default="$(optenv ROBOT_XACRO rb1_base_std.urdf.xacro)"/>
+
+  <!-- LASER -->
+  <arg name="has_laser"   default="$(optenv ROBOT_HAS_LASER true)"/>
+  <arg name="laser_model" default="$(optenv ROBOT_LASER_MODEL hokuyo_ust)"/>
+  <arg name="laser_port"  default="$(optenv ROBOT_LASER_PORT /dev/ttyACM0)"/>
+  <arg name="ip_address"  default="$(optenv ROBOT_LASER_IP)"/>
+  <arg name="laser_node"  default="front_laser"/>
+
+  <!-- DOCKER -->
+  <arg name="has_docker" default="$(optenv ROBOT_HAS_DOCKER false)"/>
+
+  <!-- RGBD -->
+  <arg name="has_rgbd_camera"   default="$(optenv ROBOT_HAS_RGBD_CAMERA false)"/>
+  <arg name="rgbd_model"        default="$(optenv ROBOT_RGBD_MODEL orbbec)"/>
+  <arg name="rgbd_camera_node"  default="front_rgbd_camera"/>
+  <arg name="rgbd_camera_id"    default="$(optenv ROBOT_RGBD_CAMERA_ID #1)"/>
+
+  <!-- OTHERS -->
+  <arg name="pad_model" default="$(optenv ROBOT_PAD_MODEL ps4)"/>
+
+
+  <!-- ******************************************************************** -->
+  <!-- map_nav_manager -->
+  <include file="$(find poi_manager)/launch/poi_manager.launch"/>
+
+  <!-- ******************************************************************** -->
+  <include file="$(find map_nav_manager)/launch/map_nav_complete.launch"/>
+
+  <!-- ****************************************************************** -->
+  <!-- start robot_state_publisher - publish fixed transforms, load robot model to param server -->
+  <include file="$(find rb1_base_description)/launch/rb1_base_state.launch">
+    <arg name="prefix"  value="/"/>
+    <arg name="version" value="$(arg xacro_robot)"/>
+  </include>
+
+  <!-- ****************************************************************** -->
+  <!-- start robotnik_base_hw -->
+  <include file="$(find rb1_base_bringup)/launch/robotnik_base_hw.launch"/>
+
+  <!-- ****************************************************************** -->
+  <!-- IMU -->
+  <include file="$(find rb1_base_bringup)/launch/px4.launch"/>
+
+  <!-- ****************************************************************** -->
+  <!-- start robot web server -->
+  <!--include file="$(find rb1_base_web)/launch/rb1_base_web.launch"/-->
+
+  <!-- ****************************************************************** -->
+  <!-- start rb1_base_control -->
+  <include file="$(find rb1_base_control)/launch/rb1_base_control.launch">
+    <arg name="prefix"  value="/"/>  
+    <arg name="sim"     value="false"/>
+  </include>
+
+  <!-- ****************************************************************** -->
+  <!-- start localization configuration -->
+  <!--
+  <include file="$(find rb1_base_localization)/launch/rb1_base_localization_basic.launch"/>
+  -->
+
+  <!-- ****************************************************************** -->
+  <!-- start rb1_base_pad - robot ps joystick -->
+  <include file="$(find rb1_base_pad)/launch/rb1_base_pad.launch">
+    <arg name="pad_model" value="$(arg pad_model)"/>
+  </include>
+
+  <!-- ****************************************************************** -->
+  <!-- start laser node -->
+  <include if="$(arg has_laser)" file="$(find rb1_base_bringup)/launch/$(arg laser_model).launch">
+    <arg name="frame_id"    value="front_laser_link"/>
+    <arg name="ip_address"  value="$(arg ip_address)"/>
+    <arg name="port"        value="$(arg laser_port)"/>
+    <arg name="node_name"   value="$(arg laser_node)"/>
+  </include>
+
+  <!-- ****************************************************************** -->
+  <!-- start rgbd camera node -->
+  <include if="$(arg has_rgbd_camera)" file="$(find rb1_base_bringup)/launch/orbbec.launch">
+    <arg name="camera"    value="$(arg rgbd_camera_node)"/>
+    <arg name="prefix"    value="$(arg rgbd_camera_node)"/>
+    <arg name="device_id" value="$(arg rgbd_camera_id)"/>
+  </include>
+
+  <!-- ****************************************************************** -->
+  <!-- start calibrator -->
+  <include file="$(find imu_calibrator)/launch/calibrator.launch"/>
+
+  <!-- ******************************************************************** -->
+  <!-- start docking -->
+  <include if="$(arg has_docker)" file="$(find rb1_base_navigation)/launch/docking/rb1_base_docking.launch"/>
+
+</launch>

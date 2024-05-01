@@ -1,0 +1,1350 @@
+<!Doctype html>
+<meta charset="UTF-8">
+<!-- author Robotnik -->
+
+
+<html>
+
+<link rel="stylesheet" href="css_files/my_mini.css"></link>
+<link rel="stylesheet" href="css_files/bootOver.css"/>
+<link rel="stylesheet" href="css_files/jquery-ui.css"/>
+
+<head>
+	<!--script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script-->
+	<!--script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script-->
+	<script type="text/javascript" src="javascript_libraries/eventemitter2.min.js"></script>
+	<script type="text/javascript" src="javascript_libraries/roslib.min.js"></script>
+	<script type="text/javascript" src="javascript_libraries/jquery-2.1.0.min.js"></script>
+	<script type="text/javascript" src="javascript_libraries/jquery-ui-1.10.4.min.js"></script>
+	<script type="text/javascript" src="javascript_libraries/Ros3D.js"></script>
+	<script type="text/javascript" src="javascript_libraries/three.js"></script>
+	<script type="text/javascript" src="javascript_libraries/ColladaLoader2.js"></script>
+	   
+    
+    <script type="text/javascript">
+/*
+	window.onload = startInterval;
+	
+     function startInterval()
+     {
+      	  setInterval("startTime();",2000); 
+	  setInterval("startTime2();",1000);
+      }
+
+*/		
+
+	var pos_x= 0.0;
+	var pos_y= 0.0;	
+	var pos_zoom = 0.0;
+	var is_recording = 0;
+	var yaw_angle = 0.0;
+	var battery_level = 0.0;
+	var battery_level_corrected;
+	var maximum_battery_level = 27.2;
+	var minimum_battery_level = 22.5;
+	var battery_status = false;
+	var reverse_direction = false;
+	var deactivate_imu_msg;
+	var imu_state = false;
+	var imu_temperature = 0.0;
+	var imu_temperature_status = 0.0;
+	var limit_temperature = 60.0;
+	var x_position;
+	var y_position;
+	var z_position;
+	var x_orientation;
+	var y_orientation;
+	var z_orientation;
+	var emergency_button_status = false;
+	var lw_data = ["","","",""];
+	var rw_data = ["","","",""];
+	var status_word_string = "";
+	var status_word_sub_string = "";
+	
+	// wheel drivers flag history
+	var lw_data_history = ["","","",""];
+	var rw_data_history = ["","","",""];
+	
+	//controller options
+	var gearbox_reduction = 12.52;
+	var diameter_wheel = 0.150;
+	var motors_encoders_factor = 4000;	
+	var motion_odometry = "false";
+	var motors_encoder = "false";
+		
+	var status_codes = 
+	["SW_READY_TO_SWITCH_ON", //0
+	"SW_SWITCHED_ON",
+	"SW_OP_ENABLED",
+	"SW_FAULT",
+	"SW_VOLTAGE_ENABLED",
+	"SW_QUICK_STOP",		//5
+	"SW_SWITCH_ON_DISABLED",
+	"SW_WARNING",
+	"SW_DELAY",
+	"FLAG NOT USED",
+	"SW_TARGET_REACHED",	//10
+	"FLAG NOT USED",
+	"SW_HOME_ATTAINED",
+	"SW_HOMING_ERROR",
+	"SW_CAPTURE",		//14
+	"FLAG NOT USED"];
+	
+	var drive_status_codes = [
+	"DS_BRIDGE_ENABLED",  //0
+	"DS_DYNAMIC_BRAKE_ENABLED",
+	"DS_SHUNT_ENABLED",
+	"DS_POSITIVE_STOP_ENABLED",
+	"DS_NEGATIVE_STOP_ENABLED",
+	"DS_POSITIVE_TORQUE_INHIBIT_ACTIVE",	//5
+	"DS_NEGATIVE_TORQUE_INHIBIT_ACTIVE",
+	"DS_EXTERNAL_BRAKE_ACTIVE",
+	"DS_DRIVE_RESET",
+	"DS_DRIVE_INTERNAL_ERROR",
+	"DS_SHORT_CIRCUIT",//10
+	"DS_CURRENT_OVERSHOOT",
+	"DS_UNDER_VOLTAGE",
+	"DS_OVER_VOLTAGE",
+	"DS_DRIVER_OVER_TEMPERATURE",
+	"DS_PARAMETER_RESTORE_ERROR",//15
+	"DS_PARAMETER_STORE_ERROR",
+	"DS_INVALID_HALL_STATE",
+	"DS_PHASE_SYNC_ERROR",
+	"DS_MOTOR_OVER_TEMPERATURE",
+	"DS_PHASE_DETECTION_FAULT",//20
+	"DS_FEEDBACK_SENSOR_ERROR",
+	"DS_MOTOR_OVER_SPEED",
+	"DS_MAX_MEASURED_POSITION",
+	"DS_MIN_MEASURED_POSITION",
+	"DS_COMMUNICATION_ERROR",//25
+	"DS_LOG_ENTRY_MISSED",
+	"DS_COMMANDED_DISABLE",
+	"DS_USER_DISABLE",
+	"DS_POSITIVE_INHIBIT",
+	"DS_NEGATIVE_INHIBIT",//30
+	"DS_CURRENT_LIMITING",
+	"DS_CONTINUOUS_CURRENT",
+	"DS_CURRENT_LOOP_SATURED",
+	"DS_USER_UNDER_VOLTAGE",
+	"DS_USER_OVER_VOLTAGE",//35
+	"DS_NONSINUSOIDAL_COMMUTATION",
+	"DS_PHASE_DETECTION",
+	"DS_USER_AUXILIARY_DISABLE",
+	"DS_SHUNT_REGULATOR",
+	"DS_PHASE_DETECTION_COMPLETE",//40
+	"DS_ZERO_VELOCITY",
+	"DS_AT_COMMAND",
+	"DS_VELOCITY_FOLLOWING_ERROR",
+	"DS_POSITIVE_TARGET_VELOCITY_LIMIT",
+	"DS_NEGATIVE_TARGET_VELOCITY_LIMIT",//45
+	"DS_COMMAND_LIMITER_ACTIVE",
+	"DS_IN_HOME_POSITION",
+	"DS_POSITON_FOLLOWING_ERROR",
+	"DS_MAX_TARGET_POSITION_LIMIT",
+	"DS_MIN_TARGET_POSITION_LIMIT",//50
+	"DS_LOAD_MEASURED_POSITION",
+	"DS_LOAD_TARGET",
+	"DS_HOMING_ACTIVE",
+	"DS_HOMING_COMPLETE",
+	"DS_PVT_BUFFER_FULL",//55
+	"DS_PVT_BUFFER_EMPTY",
+	"DS_PVT_BUFFER_THRESHOLD",
+	"DS_PVT_BUFFER_FAILURE",
+	"DS_PVT_BUFFER_EMPTY_STOP",
+	"DS_PVT_BUFFER_SEQUENCE_ERROR",//60
+	"DS_COMMANDED_STOP",
+	"DS_USER_QUICKSTOP",
+	"DS_COMMANDED_POSITIVE_LIMIT",
+	"DS_COMMANDED_NEGATIVE_LIMIT",
+	"FLAG NOT USED"]; //65
+
+	
+        /*
+	var ros = new ROSLIB.Ros({
+		url : 'ws://localhost:9090'
+	});
+	*/
+	
+	var ros = new ROSLIB.Ros({
+		url : 'ws://192.168.0.200:9090'
+	});
+	
+	
+	
+	// Publishers
+	// -----------
+	/*
+	var aux = new ROSLIB.Topic({  
+		ros : ros,
+		name : '/axis_camera/ptz_command',
+		messageType : 'robotnik_msgs/ptz'
+	});
+    */
+    /*
+	var deactivate_imu_topic = new ROSLIB.Topic({  
+			ros:ros,
+			name : '/rb1_base_web/deactivate_imu',
+			messageType : 'std_msgs/Bool'
+	});
+	*/
+			
+	// Subscribing to Topics
+    // ----------------------    
+    //battery topic
+    var listener = new ROSLIB.Topic({
+      ros : ros,
+      name : 'robotnik_base_hw/battery',
+      messageType : 'std_msgs/Float32'
+    });
+
+    //imu state topic
+    var imuStateListener = new ROSLIB.Topic({
+      ros : ros,
+      name : 'mavros/state',
+      messageType : 'mavros_msgs/State'
+    });
+    
+    //imu temperature topic    
+    var imu_temperature_listener = new ROSLIB.Topic({
+      ros : ros,
+      name : 'mavros/imu/temperature',
+    //  messageType : 'std_msgs/Float32'
+      messageType : 'sensor_msgs/Temperature'
+    });
+    
+    //emergency stop topic    
+    var emergency_stop_listener = new ROSLIB.Topic({
+      ros : ros,
+      name : 'robotnik_base_hw/emergency_stop',
+      messageType : 'std_msgs/Bool'
+    });
+    
+    // Odometry topic
+    var odometry_listener = new ROSLIB.Topic({
+      ros : ros,
+      name : 'robotnik_base_control/odom',
+      messageType : 'nav_msgs/Odometry'
+    });
+    
+    // Motor Status topic
+    var motor_status_listener = new ROSLIB.Topic({
+      ros : ros,
+      name : 'robotnik_base_hw/status',
+      messageType : 'robotnik_msgs/RobotnikMotorsStatus'
+    });
+    
+    
+	// Message Handlers
+	// ----------------------	
+	// Battery
+    listener.subscribe(function(message) {
+		battery_level = message.data;
+    });
+    	
+	// IMU State
+	imuStateListener.subscribe(function(message) {
+	
+		//console.log(message.data);
+		if ( message.connected == true && !imu_state ){ 
+			//document.querySelector('#imu_status span').innerHTML = "OK";
+			document.querySelector('#imu_status span').innerHTML = "<img width=30  height=30 src=images/light-green-flash.jpg border=\"0\">";
+			imu_state = true;
+			
+		}
+		if ( message.connected == false && imu_state){
+			//document.querySelector('#imu_status span').innerHTML = "FAILURE";
+			document.querySelector('#imu_status span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif border=\"0\">";
+			imu_state = false;
+		}
+    });
+    
+    // imu temperature
+    imu_temperature_listener.subscribe(function(message){
+		imu_temperature = message.temperature;
+	});
+   
+    
+    
+    // Emergency Stop Listener
+    emergency_stop_listener.subscribe(function(message){
+		
+		if ( message.data) {
+			document.querySelector('#emergency_stop span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif>";
+			//emergency_button_status = true;
+		}
+		else if ( !message.data) {
+			document.querySelector('#emergency_stop span').innerHTML = "<img width=30 height=30 src=images/light-green-flash.jpg>";
+			//emergency_button_status = false;
+		}
+                console.log('emergency stop');
+	});
+	
+	// Odometry Listener
+    odometry_listener.subscribe(function(message){
+				
+		x_position = message.pose.pose.position.x;
+		y_position = message.pose.pose.position.y;
+		z_position = message.pose.pose.position.z;
+		
+		x_orientation = message.pose.pose.orientation.x;
+		y_orientation = message.pose.pose.orientation.y;
+		z_orientation = message.pose.pose.orientation.z;
+		
+	});
+	
+	// Motor Status Listener
+    motor_status_listener.subscribe(function(message){
+		lw_data[0] = message.motor_status[0].state;
+		lw_data[1] = message.motor_status[0].status;
+		lw_data[2] = message.motor_status[0].statusword;
+		lw_data[3] = message.motor_status[0].driveflags;
+				
+		rw_data[0] = message.motor_status[1].state;
+		rw_data[1] = message.motor_status[1].status;
+		rw_data[2] = message.motor_status[1].statusword;
+		rw_data[3] = message.motor_status[1].driveflags;
+					
+		// space is required for the comparison
+		if(lw_data[1] == "OPERATION_ENABLED"){
+			document.querySelector('#left_wheel_status span').innerHTML = "<img width=30 height=30 src=images/light-green-flash.jpg>";
+		}else{
+			document.querySelector('#left_wheel_status span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif>";	
+		}
+				
+		if(rw_data[1] == "OPERATION_ENABLED"){
+			document.querySelector('#right_wheel_status span').innerHTML = "<img width=30 height=30 src=images/light-green-flash.jpg>";
+		}else{
+			document.querySelector('#right_wheel_status span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif>";	
+		}
+				
+	});
+	
+ 		
+        function stopJo(){
+		var ros = new ROSLIB.Ros({
+   	 		url : 'ws://rb1base:9090'    
+  		});
+				
+      }
+      
+        function startJo(){
+		var ros = new ROSLIB.Ros({
+   	 		url : 'ws://rb1base:9090'    
+  		});
+
+      }
+            
+     function Foward(){
+		
+		var aux2 = new ROSLIB.Topic({  
+			ros:ros,
+			name : 'cmd_vel',
+			messageType : 'geometry_msgs/Twist'
+		});
+
+
+		var twist = new ROSLIB.Message({
+		linear : {
+			x : 0.2,
+			y : 0.0,
+			z : 0.0
+			},
+		angular : {
+			x : 0.0,
+			y : 0.0,
+			z : 0.0
+		}
+		});
+
+		aux2.publish(twist);  
+		
+       }
+   function Back(){
+
+		var aux2 = new ROSLIB.Topic({  
+			ros:ros,
+			name : 'cmd_vel',
+			messageType : 'geometry_msgs/Twist'
+		});
+
+
+		var twist = new ROSLIB.Message({
+		linear : {
+			x : -0.2,
+			y : 0.0,
+			z : 0.0
+			},
+		angular : {
+			x : 0.0,
+			y : 0.0,
+			z : 0.0
+		}
+		});
+
+		aux2.publish(twist); 
+	
+       }
+     function Right(){
+
+		var aux2 = new ROSLIB.Topic({  
+			ros:ros,
+			name : 'cmd_vel',
+			messageType : 'geometry_msgs/Twist'
+		});
+
+		var twist = new ROSLIB.Message({
+		linear : {
+			x : 0.0,
+			y : 0.0,
+			z : 0.0
+			},
+		angular : {
+			x : 0.0,
+			y : 0.0,
+			z : -0.2
+		}
+		});
+
+		aux2.publish(twist); 
+	
+       }
+     function Left(){
+
+		var aux2 = new ROSLIB.Topic({  
+			ros:ros,
+			name : 'cmd_vel',
+			messageType : 'geometry_msgs/Twist'
+		});
+
+		var twist = new ROSLIB.Message({
+		linear : {
+			x : 0.0,
+			y : 0.0,
+			z : 0.0
+			},
+		angular : {
+			x : 0.0,
+			y : 0.0,
+			z : 0.2
+		}
+		});
+
+		aux2.publish(twist); 
+	
+       }
+       
+       function startRecording(){
+		   
+		   	if(is_recording == 0)
+				is_recording = 1;
+
+		   var aux2 = new ROSLIB.Service({  
+			ros : ros,
+			name : 'start_recording',
+			messageType : 'rb1_base_web/RecordVideo'
+			});
+		
+			var data = new ROSLIB.ServiceRequest({
+				startRecording : 1
+			});
+			
+			aux2.callService(data,function(res){
+				console.log("start recording");
+				filename = res.filename;
+								
+			});
+			updateStrings(filename = "");
+		}
+		
+		function stopRecording(){
+		   
+		   if(is_recording == 1)
+				is_recording = 0;
+		   
+		   var aux2 = new ROSLIB.Service({  
+			ros : ros,
+			name : 'start_recording',
+			messageType : 'rb1_base_web/RecordVideo'
+			});
+		
+			var data = new ROSLIB.ServiceRequest({
+				startRecording : 0
+			});
+			
+			aux2.callService(data,function(res){
+				console.log("stop recording");
+				filename = res.filename;
+				console.log('Saved file on ' + res.filename);
+				updateStrings(filename);
+			});
+			
+			
+		}
+		
+		function saveImage(){
+			
+			//console.log("Saving Image");
+			
+			var aux2 = new ROSLIB.Service({  
+				ros : ros,
+				name : 'start_recording',
+				messageType : 'rb1_base_web/RecordVideo'
+			});
+			
+			var data = new ROSLIB.ServiceRequest({
+				startRecording : 2
+			});
+			
+			aux2.callService(data,function(res){
+				//console.log("Image saved");
+				document.querySelector('#imageStatus').innerHTML = "Image saved at " + res.filename;
+			});
+			
+		}
+		
+		/*
+		function callkeydownhandler(evnt, event2) {
+		   var ev = (evnt) ? evnt : event;
+		   var ev2 = (evnt) ? evnt : event2;
+		   var code=(ev.which) ? ev.which : event.keyCode;
+		   var code2=(ev.which) ? ev.which : event.keyCode;
+			
+		   if(code == 37)
+			Left();
+		   else if(code2 == 38)
+			Foward();
+		   else if(code == 39)
+			Right();
+		   else if(code2 == 40 )
+			Back();
+		}
+		
+
+		if (window.document.addEventListener) {
+		   window.document.addEventListener("keydown", callkeydownhandler, false);
+		} else {
+		   window.document.attachEvent("onkeydown", callkeydownhandler);
+		}
+		*/
+		
+		function updateStrings(filename)
+		{
+			if(is_recording == 0)
+				document.querySelector('#videoStatus').innerHTML = filename + ' recorded';
+			else if(is_recording == 1)			
+				document.querySelector('#videoStatus').innerHTML = 'Recording video';
+		}
+				
+		function deactivateIMU(){
+			deactivate_imu_msg.data = true;
+			document.querySelector('#imu_connected span').innerHTML = "NO";
+		}
+		
+		function activateIMU(){
+			deactivate_imu_msg.data = false;
+			document.querySelector('#imu_connected span').innerHTML = "SI";
+		}
+		
+		function reset_odometry(){
+					
+			var aux2 = new ROSLIB.Service({  
+				ros : ros,
+				name : 'set_odometry',
+				messageType : 'robotnik_msgs/set_odometry'
+			});
+			
+			var data = new ROSLIB.ServiceRequest({
+				x : 0.0,
+				y : 0.0,
+				z : 0.0,
+				orientation : 0.0
+			});
+			
+			aux2.callService(data,function(res){
+							
+			});
+			
+		}
+
+		function calibrate_gyro(){					
+			var aux2 = new ROSLIB.Service({  
+				ros : ros,
+				name : '/rb1_base/calibrate_imu_gyro',
+				messageType : 'std_srvs/TriggerRequest'
+			});
+	
+			var data = new ROSLIB.ServiceRequest({				
+			});
+	
+			aux2.callService(data,function(res){							
+			});			
+		}
+		
+		function saveControllerOptions(){
+			
+			//get options from ui			
+			gearbox_reduction = $("#gearbox_reduction_spinner").spinner("value");
+			gearbox_reduction = parseFloat(gearbox_reduction);
+			
+			diameter_wheel = $("#diameter_wheel_spinner").spinner("value");
+			diameter_wheel = parseFloat(diameter_wheel);
+			
+			motion_odometry = document.getElementById("motion_odometry_checkbox").checked;
+			//if (motion_odometry) 
+			//	motion_odometry = "true";
+			//else
+			//	motion_odometry = "false";
+				
+			motors_encoders = document.getElementById("motors_encoders_checkbox").checked;
+			//if (motors_encoders) 
+			//	motors_encoders = "true";
+			//else
+			//	motors_encoders = "false";
+				
+			motors_encoders_factor = $("#motors_encoders_factor_spinner").spinner("value");
+			motors_encoders_factor = parseFloat(motors_encoders_factor);
+			
+						
+			var aux2 = new ROSLIB.Service({  
+				ros : ros,
+				name : 'set_controller_options',
+				messageType : 'rb1_base_web/set_controller_options'
+			});
+			
+			var data = new ROSLIB.ServiceRequest({
+				gearboxReduction : gearbox_reduction,
+				diameterWheel : diameter_wheel,
+				motionOdometry : motion_odometry,
+				motorsEncoder : motors_encoders,
+				motorsEncoderFactor : motors_encoders_factor
+			});
+			
+			aux2.callService(data,function(res){});
+			
+		}
+		
+		function update_controller_options(){
+			var aux2 = new ROSLIB.Service({  
+				ros : ros,
+				name : 'get_controller_options',
+				messageType : 'rb1_base_web/get_controller_options'
+			});
+			var data = new ROSLIB.ServiceRequest({});
+			
+			aux2.callService(data,function(res){
+				console.log(res.gearboxReduction);
+				console.log(res.diameterWheel);
+				console.log(res.motionOdometry);
+				console.log(res.motorsEncoder);
+				console.log(res.motorsEncoderFactor);
+												
+				//if(res.motionOdometry == "true")
+				//	motion_odometry = true;
+				//else
+				//	motion_odometry = false;
+				motion_odometry = res.motionOdometry;				
+					
+				//if(res.motorsEncoder == "true")
+				//	motors_encoder = true;
+				//else
+				//	motors_encoder = false;
+				motors_encoder = res.motorsEncoder;
+												
+				document.getElementById("motion_odometry_checkbox").checked = motion_odometry;								
+				document.getElementById("motors_encoders_checkbox").checked = motors_encoder;
+				
+				$("#gearbox_reduction_spinner").spinner("value",res.gearboxReduction);
+				$("#diameter_wheel_spinner").spinner("value",res.diameterWheel);
+				$("#motors_encoders_factor_spinner").spinner("value",res.motorsEncoderFactor);
+				});
+			
+		}
+		
+		function resetDriverHistory()
+		{
+			
+			for(var i=0; i<status_codes.length; i++)
+			{
+				lw_data_history[2] = "0000000000000000";
+				rw_data_history[2] = "0000000000000000";
+			}
+			for(var i=0; i<drive_status_codes.length; i++)
+			{
+				lw_data_history[3] = "00000000000000000000000000000000000000000000000000000000000000000";
+				rw_data_history[3] = "00000000000000000000000000000000000000000000000000000000000000000";
+			}
+		};
+		
+		function mainLoop(){
+			
+			//yaw_angle_left_100 = yaw_angle_left*100/90;
+			//yaw_angle_right_100 = yaw_angle_right*100/90;
+		   	
+		   	//angle progressbars 
+		    //$("#progressbar_left").progressbar({value: yaw_angle_left_100});
+		    //$("#progressbar_right").progressbar({value: yaw_angle_right_100});
+		    
+		    //change color
+		    //console.log(yaw_angle_left_100)
+		    //if( yaw_angle_left_100 > 10.0){
+				//console.log("Changing color");
+				//document.getElementById("progressbar_battery").style.backgroundColor="blue";
+				//document.getElementsByClassName("ui-progressbar3").style.backgroundColor="blue";
+				
+			//}
+		    
+		    //min valuye = 23, max value = 27.2
+		    battery_level_corrected = battery_level - minimum_battery_level;
+		    $("#progressbar_battery").progressbar({value: battery_level_corrected});
+		    
+				    
+		    //maxAngleTopic.publish(max_angle_message);	
+		    //trimAngleTopic.publish(trim_angle_message);
+		    //deactivate_imu_topic.publish(deactivate_imu_msg);
+		    
+		    // update battery
+		    // -------------
+		    battery_level = Math.round(battery_level * 100) / 100;
+			document.querySelector('#battery_status span').innerHTML = battery_level;
+		
+			if(battery_level < 23.0 && battery_status ) {
+				document.querySelector('#battery_ok span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif>";
+				battery_status = false;
+				//console.log("Battery not ok");
+			}
+			else if(battery_level >= 23.0 && !battery_status ) {
+				document.querySelector('#battery_ok span').innerHTML = "<img width=30 height=30 src=images/light-green-flash.jpg>";
+				//console.log("Battery ok");
+				battery_status = true;
+			}
+		    
+		    
+		    // update imu temperature
+		    // -------------
+			imu_temperature = Math.round(imu_temperature * 100) / 100;
+			document.querySelector('#imu_temperature span').innerHTML = imu_temperature;
+			
+			if ( imu_temperature < limit_temperature && !imu_temperature_status) {
+				document.querySelector('#imu_temperature_alarm span').innerHTML = "<img width=30 height=30 src=images/light-green-flash.jpg>";
+				imu_temperature_status = true;
+			}
+			else if (imu_temperature >= limit_temperature && imu_temperature_status) {
+				document.querySelector('#imu_temperature_alarm span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif>";
+				imu_temperature_status = false;
+                                }
+		    		    		    
+	            // update odometry
+		    // -------------
+		    
+			x_position = Math.round(x_position * 10000) / 10000;
+			y_position = Math.round(y_position * 10000) / 10000;
+			z_position = Math.round(z_position * 10000) / 10000;
+			
+			x_orientation = Math.round(x_orientation * 10000) / 10000;
+			y_orientation = Math.round(y_orientation * 10000) / 10000;
+			z_orientation = Math.round(z_orientation * 10000) / 10000;
+			
+			if (x_position == 0) x_position = x_position.toFixed(4);
+			if (y_position == 0) y_position = y_position.toFixed(4);
+			if (z_position == 0) z_position = z_position.toFixed(4);
+			if (x_orientation == 0) x_orientation = x_orientation.toFixed(4);
+			if (y_orientation == 0) y_orientation = y_orientation.toFixed(4);
+			if (z_orientation == 0) z_orientation = z_orientation.toFixed(4);
+			
+			
+			document.querySelector('#odometry_position_x span').innerHTML = x_position;
+			document.querySelector('#odometry_position_y span').innerHTML = y_position;
+			document.querySelector('#odometry_position_z span').innerHTML = z_position;
+			
+			document.querySelector('#odometry_orientation_x span').innerHTML = x_orientation;
+			document.querySelector('#odometry_orientation_y span').innerHTML = y_orientation;
+			document.querySelector('#odometry_orientation_z span').innerHTML = z_orientation;
+		    
+		    //update motor values
+		    
+		    // Left Motor
+			// ----------
+		    document.querySelector('#lw_state span').innerHTML = lw_data[0];
+			document.querySelector('#lw_status span').innerHTML = lw_data[1];
+			
+			status_word_string = "";
+			status_word_sub_string = "";
+			for( var i = 0; i < lw_data[2].length ; i++)
+			{
+					if(lw_data[2][i] == 1)
+					{
+						status_word_sub_string = status_codes[i];
+						status_word_string = status_word_string.concat("<br><b>",status_word_sub_string,"</b>");
+						
+						// updating history
+						lw_data_history[2] = lw_data_history[2].substr(0, i) + '1' + lw_data_history[2].substr(i + 1);
+					}
+					else 
+					{
+						if(lw_data_history[2][i] == 1) // flag used in the past
+						{
+							status_word_sub_string = status_codes[i];
+							status_word_string = status_word_string.concat("<br><ins>",status_word_sub_string,"</ins>");
+							//console.log("flag used in the past");
+						}
+						else // flag off
+						{
+							status_word_sub_string = status_codes[i];
+							status_word_string = status_word_string.concat("<br>",status_word_sub_string);
+						}
+					}
+			};
+			document.querySelector('#lw_status_words span').innerHTML = status_word_string;
+
+			status_word_string = "";
+			status_word_sub_string = "";
+			for( var i = 0; i < lw_data[3].length ; i++)
+			{
+					if(lw_data[3][i] == 1)
+					{
+						status_word_sub_string = drive_status_codes[i];
+						status_word_string = status_word_string.concat("<br><b>",status_word_sub_string,"</b>");
+					
+						// updating history
+						lw_data_history[3] = lw_data_history[3].substr(0, i) + '1' + lw_data_history[3].substr(i + 1);
+					}
+					else 
+					{
+						if(lw_data_history[3][i] == 1) // flag used in the past
+						{
+							status_word_sub_string = drive_status_codes[i];
+							status_word_string = status_word_string.concat("<br><ins>",status_word_sub_string,"</ins>");
+							//console.log("flag used in the past");
+						}
+						else // flag off
+						{
+							status_word_sub_string = drive_status_codes[i];
+							status_word_string = status_word_string.concat("<br>",status_word_sub_string);
+						}
+					}
+			};
+			document.querySelector('#lw_driver_status_words span').innerHTML = status_word_string;
+			
+			
+			// Right Motor
+			// -----------			
+			document.querySelector('#rw_state span').innerHTML = rw_data[0];
+			document.querySelector('#rw_status span').innerHTML = rw_data[1];
+			
+			// status codes
+			// -------------
+			status_word_string = "";
+			status_word_sub_string = "";
+							
+			for( var i = 0; i < rw_data[2].length ; i++)
+			{
+					if(rw_data[2][i] == 1)
+					{
+						status_word_sub_string = status_codes[i];
+						status_word_string = status_word_string.concat("<br><b>",status_word_sub_string,"</b>");
+						
+						// updating history
+						rw_data_history[2] = rw_data_history[2].substr(0, i) + '1' + rw_data_history[2].substr(i + 1);
+					}
+					else 
+					{
+						if(rw_data_history[2][i] == 1) // flag used in the past
+						{
+							status_word_sub_string = status_codes[i];
+							status_word_string = status_word_string.concat("<br><ins>",status_word_sub_string,"</ins>");
+							//console.log("flag used in the past");
+						}
+						else // flag off
+						{
+							status_word_sub_string = status_codes[i];
+							status_word_string = status_word_string.concat("<br>",status_word_sub_string);
+						}
+					}
+			};
+			document.querySelector('#rw_status_words span').innerHTML = status_word_string;
+			status_word_string = "";
+			status_word_sub_string = "";
+			for( var i = 0; i < rw_data[3].length ; i++)
+			{
+					if(rw_data[3][i] == 1)
+					{
+						status_word_sub_string = drive_status_codes[i];
+						status_word_string = status_word_string.concat("<br><b>",status_word_sub_string,"</b>");
+					
+						// updating history
+						rw_data_history[3] = rw_data_history[3].substr(0, i) + '1' + rw_data_history[3].substr(i + 1);
+					}
+					else 
+					{
+						if(rw_data_history[3][i] == 1) // flag used in the past
+						{
+							status_word_sub_string = drive_status_codes[i];
+							status_word_string = status_word_string.concat("<br><ins>",status_word_sub_string,"</ins>");
+							//console.log("flag used in the past");
+						}
+						else // flag off
+						{
+							status_word_sub_string = drive_status_codes[i];
+							status_word_string = status_word_string.concat("<br>",status_word_sub_string);
+						}
+					}
+			};
+			document.querySelector('#rw_driver_status_words span').innerHTML = status_word_string;
+		    
+		} // main_loop 
+		 
+		//jquery init
+		$(document).ready(function() {
+			
+			//set tab
+			$( "#tabs" ).tabs();
+			
+			$( "#tabs" ).on( "tabsactivate", function( event, ui ) {
+				//console.log("before activate");
+				console.log(event);
+				//console.log(ui.newPanel.selector);
+				
+				// update displays (controller)
+				update_controller_options();
+				
+				if(ui.newPanel.selector == "#tabs-2" )
+				{
+					
+					
+					var pass1 = prompt('Enter password','');
+					if(pass1 == "robotnik")
+					{
+						console.log("correct password");						
+					}
+					else {
+						console.log("incorrect password");
+						$( "#tabs" ).tabs( "option", "active", 0 );
+						//$( "#tabs" ).tabs( "load", 0 );
+					}
+				}
+				
+				var active = $( "#tabs" ).tabs( "option", "active" );
+				console.log("panel active: " + active);
+			});
+						
+			//Progress bars
+			$("#progressbar_battery").progressbar({value: battery_level});
+			$("#progressbar_battery" ).progressbar( "option", "max", maximum_battery_level - minimum_battery_level );
+																			
+			//Spinners (controller options)
+			$("#gearbox_reduction_spinner").spinner({step: 0.01, min: 0.0, max: 100.0});
+			$("#gearbox_reduction_spinner").spinner("value",gearbox_reduction);
+			$("#diameter_wheel_spinner").spinner({step: 0.001, min: 0.0, max: 1.0});
+			$("#diameter_wheel_spinner").spinner("value",diameter_wheel);
+			$("#motors_encoders_factor_spinner").spinner({step: 1, min: 0, max: 100000});
+			$("#motors_encoders_factor_spinner").spinner("value",motors_encoders_factor);
+		
+		
+			//document.querySelector('#imu_connected span').innerHTML = "SI";
+						
+			// Sliders
+			$( "#slider_zoom" ).slider();
+			$( "#slider_focus" ).slider();
+			$( "#slider_zoom" ).on( "slidechange", function( event, ui ) {
+								
+				var slider_value = $( "#slider_zoom" ).slider( "value" );
+				pos_zoom = slider_value * 172;
+				//console.log(pos_zoom);
+				move();
+				} );
+				
+			// init alarms
+			document.querySelector('#imu_status span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif border=\"0\">";
+			document.querySelector('#battery_ok span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif>";
+			document.querySelector('#imu_temperature_alarm span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif>";
+			document.querySelector('#emergency_stop span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif>";
+			document.querySelector('#left_wheel_status span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif>";
+			document.querySelector('#right_wheel_status span').innerHTML = "<img width=30 height=30 src=images/light-red-flash.gif>";
+			
+			//init messages
+			deactivate_imu_msg = new ROSLIB.Message({
+			 data : false
+			});
+			
+			// Motor Dialogs
+			// --------------
+			
+			// Left Motor
+			// ----------
+			
+			$("#dialog_lw").dialog({
+				autoOpen: false
+			});
+			
+			$("#button_lw").click(function(){
+				
+				//close other dialogs
+				$("#dialog_lw").dialog("close");
+				$("#dialog_rw").dialog("close");
+				
+				$("#dialog_lw").dialog("open");
+			});
+					
+			// Right Motor
+			// -----------
+			
+			$("#dialog_rw").dialog({
+				autoOpen: false
+			});
+			
+			$("#button_rw").click(function(){
+				
+				//close other dialogs
+				$("#dialog_lw").dialog("close");
+				$("#dialog_rw").dialog("close");				
+				
+				$("#dialog_rw").dialog("open");
+			});
+						
+			// reset drivers data history
+			resetDriverHistory();			
+			
+			//call to mainLoop each x ms
+			setInterval(mainLoop, 1000);
+		});
+		
+
+</script>
+
+</head>
+
+<body>
+    <!--div class="navbar navbar-fixed-top">
+	<div class="navbar-inner">
+	<div class="container">
+		<a class="brand" > <img width="120" height="30" src="robotnik.png" style="border:0px"> </a>
+		<div id="main_menu" class="nav-collapse collapse">
+			<ul id="main-menu-left" class="nav">
+				<li>
+				   <a href = "./index.html" onlick="">Camera</a></li>
+				<li>
+				   <a href = "./index.html" onclick="">Configuration</a></li>
+				<li>
+				   <a href = "./index.html" onclick="">Others2</a></li>
+				<li>
+				   <a href = "./index.html" onclick="">Others3</a></li>
+				<li>
+				   <a href = "./index.html" onclick="">Others4</a></li>
+				<li>
+				   <a href = "./index.html" onclick="">Others5</a></li>
+		        </ul>
+		</div>
+    	</div>	
+    	</div>  
+    </div--> 
+    <div id="tabs" style="height: auto;">
+		 <ul>
+			<a href="http://www.robotnik.es/en/"><img width="200" src="robotnik.png" style="float: left; border:2px; margin:0px 0px 0px 0px"></a>
+			<li><a href="#tabs-3">Robot Status</a></li>
+			<li><a href="#tabs-1">Camera</a></li>
+			<li><a href="#tabs-2">Configuration</a></li>
+		</ul>
+			
+		
+		<!-- CAMERA TAB -->
+		<!----------------------->
+		
+		<div id="tabs-1" style="height:100em">
+			<!--div style="position: absolute; left: 1100px; top: 700px; "> 
+			 <table border="0">
+			 <tr><th />
+				 <th><input type="button" Value="+" onClick="move_cam_top()" class = "btn btn-danger"/></th>
+				 </tr>
+			 <tr><p/><tr/>
+			 <tr>
+				<td><input type="button" Value="- " onClick="move_cam_left()" class = "btn btn-danger"/></td>
+				<td><input type="button" Value="H" onClick="initial()" class = "btn btn-danger" /></td>
+				<td><input type="button" Value="+" onClick="move_cam_right()" class = "btn btn-danger"/></td>
+			 </tr>
+			 <tr>
+				<th/>
+				<td><input type="button" Value="- " onClick="move_cam_dowm()" class = "btn btn-danger" /> </td>
+			 </tr>
+			 <tr><th/>
+			 </table>
+			 </div -->
+			<div style="float:left">
+				<img WIDTH=600 HEIGHT=600 src="http://192.168.0.185/axis-cgi/mjpg/video.cgi?videocodec=h264&streamprofile=Balanced">
+			</div>
+			<!--
+			<div >  
+			<input type="button" Value="Disable joystick" onClick="stopJo()" class = "btn btn-danger"/>
+			<input type="button" Value="Enable joystick" onClick="startJo()" class = "btn btn-danger"/>
+			<br></br>
+			<input type="button" Value="position1" onClick="pos1()" class = "btn btn-danger"/> 		
+			<input type="button" Value="position2" onClick="pos2()" class = "btn btn-danger"/>	
+			<input type="button" Value="position3" onClick="pos3()" class = "btn btn-danger"/>   	
+			<input type="button" Value="position4" onClick="pos4()" class = "btn btn-danger"/>    	
+			<br></br>
+			</div>
+			-->
+		  
+		  <div style="float:left">  
+			<input type="button" Value="Start Recording" onClick="startRecording()" class = "btn btn-danger"/>
+			<input type="button" Value="Stop Recording" onClick="stopRecording()" class = "btn btn-danger"/>
+			<br>
+			<span id="videoStatus"></span>
+		
+			<!-- Button to save image, NEEDS image transport node in rb1_base_web.launch (commented) -->
+			<!--input type="button" Value="Save Image" onClick="saveImage()" class = "btn btn-danger"/-->
+			<br>
+			<span id="imageStatus"></span>
+			
+			<h3>Zoom</h3>
+		    <div id="slider_zoom" style="width: 25em; float:left; margin-left: 1em;"></div>
+		  
+		  
+		    <h3>Camera Movement</h3>
+		    <div > 
+			 <table border="0">
+			 <tr><th />
+				 <th><input type="button" Value="+" onClick="move_cam_top()" class = "btn btn-danger"/></th>
+				 </tr>
+			 <tr><p/><tr/>
+			 <tr>
+				<td><input type="button" Value="- " onClick="move_cam_left()" class = "btn btn-danger"/></td>
+				<td><input type="button" Value="H" onClick="initial()" class = "btn btn-danger" /></td>
+				<td><input type="button" Value="+" onClick="move_cam_right()" class = "btn btn-danger"/></td>
+			 </tr>
+			 <tr>
+				<th/>
+				<td><input type="button" Value="- " onClick="move_cam_dowm()" class = "btn btn-danger" /> </td>
+			 </tr>
+			 <tr><th/>
+			 </table>
+			 </div>
+			
+			
+		  </div>
+  
+		  
+		</div>
+		
+		
+		<!-- ROBOT STATE TAB -->
+		<!----------------------->		
+		<div id="tabs-3">
+		
+		<div id = "sensortopic">
+		  
+			  <br>
+			  <table border="0px">
+				  <tr >
+					<td>	  
+						IMU state &nbsp;&nbsp;&nbsp;&nbsp;    
+					</td>
+					<td>
+						Battery State &nbsp;&nbsp;&nbsp;&nbsp;
+					</td>
+					<td>
+						IMU temperature &nbsp;&nbsp;&nbsp;&nbsp;
+					</td>
+					<td>
+						Stop Button
+					</td>
+				  </tr>
+				  <tr>
+					<td style="text-align:center">
+						<div id="imu_status"> <span></span></div>
+					</td>
+					<td style="text-align:center">
+						<div id="battery_ok" > <span></span></div>
+					</td>
+					<td style="text-align:center">
+						<div id="imu_temperature_alarm"> <span></span></div>
+					</td>
+					<td  style="text-align:center">
+						<div id="emergency_stop"> <span></span></div>
+					</td>
+				  </tr>
+			  </table>
+			  <br>
+			  
+			  <h3>Battery</h3>
+			  <div id="progressbar_battery" style="width: 20em; float:left; margin-left:1em" class="ui-progressbar3" ></div><br>
+			  &nbsp;&nbsp;
+			  0% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			  25% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			  50% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			  75% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			  100%
+			  <br><br>
+			  <div id="battery_status">Battery level = <span></span></div>
+			  <div id="imu_temperature">IMU temperature = <span></span></div>
+		  </div>
+		  
+		  <h3>Odometry</h3>
+		  
+		  <table>
+			  <tr>
+				  <td style="width: 4em"></td>
+				  <td style="width: 4em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x</td>
+				  <td style="width: 4em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y</td>
+				  <td style="width: 4em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z</td>
+			  </tr>
+			  <tr>
+				  <td>Position</td>
+				  <td style="width: 4em"><div id="odometry_position_x" style="float:right"><span></span></div></td>
+				  <td style="width: 4em"><div id="odometry_position_y" style="float:right"><span></span></div></td>
+				  <td style="width: 4em"><div id="odometry_position_z" style="float:right"><span></span></div></td>
+			  
+			  </tr>
+			  <tr>
+				  <td>Orientation</td>
+			  	  <td style="width: 4em"><div id="odometry_orientation_x" style="float:right"><span></span></div></td>
+				  <td style="width: 4em"><div id="odometry_orientation_y" style="float:right"><span></span></div></td>
+				  <td style="width: 4em"><div id="odometry_orientation_z" style="float:right"><span></span></div></td>
+			  </tr>
+		  </table>
+		  <br>
+		  <input type="button" Value="Reset odometry" onClick="reset_odometry()" class = "btn btn-danger"/>
+                  <input type="button" Value="Calibrate gyro" onClick="calibrate_gyro()" class = "btn btn-danger"/>
+		  		   
+		  <br><br>		   
+		  
+		  <h3>Motor Status</h3>
+		  
+		  <table border="0px">
+				  <tr>
+					<td>	  
+						Left Wheel &nbsp;&nbsp;&nbsp;&nbsp;    
+					</td>
+					<td width="125">
+					
+					</td>
+					<td>
+						Right Wheel &nbsp;&nbsp;&nbsp;&nbsp;
+					</td>
+					<td>
+					
+					</td>
+				  </tr>
+				  <tr>
+					<td style="text-align:center">
+						<div id="left_wheel_status"> <span></span></div>
+					</td>
+					<td>
+						<input type="button" Value="Flags" class = "btn btn-danger" id="button_lw"/>
+					</td>
+					<td style="text-align:center">
+						<div id="right_wheel_status" > <span></span></div>
+					</td>
+					<td>
+						<input type="button" Value="Flags" class = "btn btn-danger" id="button_rw"/>
+					</td>
+				  </tr>
+		  </table>		   
+		  
+		  <br>
+		  
+		  <div id="dialog_lw" title="Flags left wheel">
+				Flags info: <br>
+				Flag is off <br>
+				<b>Flag is on</b><br>
+				<ins>Flag has been activated before</ins> <br><br>
+			  <div id="lw_state">State = <span></span></div>
+			  <div id="lw_status">Status = <span></span></div>
+			  <br>
+			  Flags:
+			  <div id="lw_status_words"><span></span></div>
+			  <br>
+			  Driver flags:
+			  <div id="lw_driver_status_words"><span></span></div>
+		  </div>
+		  
+		  <div id="dialog_rw" title="Flags right wheel">
+				Flags info: <br>
+				Flag is off <br>
+				<b>Flag is on</b><br>
+				<ins>Flag has been activated before</ins> <br><br>
+			  <div id="rw_state">State = <span></span></div>
+			  <div id="rw_status">Status = <span></span></div>
+			  <br>
+			  Flags:
+			  <div id="rw_status_words"><span></span></div>
+			  <br>
+			  Driver flags:
+			  <div id="rw_driver_status_words"><span></span></div>
+		  </div>
+		  	  	
+		</div>
+		
+				
+		<!-- CONFIGURATION TAB -->
+		<!----------------------->		
+		<div id="tabs-2">
+			
+			<br><br>
+			
+			<h3>Controller Configuration</h3>
+			
+			<table>
+																
+				<tr>
+					<td>Gearbox reduction:</td>
+					<td>
+						<input id="gearbox_reduction_spinner" name="gearbox_reduction_spinner" style="width:4em"/>
+						
+					</td>
+					<td>(normally 12.52 or 9.56)</td>
+				</tr>
+				
+				<tr>
+					<td>Wheel diameter:</td>
+					<td>
+						<input id="diameter_wheel_spinner" name="diameter_wheel_spinner" style="width:4em"/>
+					</td>
+				</tr>
+				
+				<tr>
+					<td>Motion odometry:  </td>
+					<td>
+						<input type="checkbox" id="motion_odometry_checkbox">
+					</td>
+					<td>Motion odometry if true, gyro movement will be ignored when the robot is stopped</td>
+				</tr>
+				
+				<tr>
+					<td>Motors encoders:  </td>
+					<td>
+						<input type="checkbox" id="motors_encoders_checkbox">
+					</td>
+				</tr>
+				
+				<tr>
+					<td>Motors encoders factor:</td>
+					<td>
+						<input id="motors_encoders_factor_spinner" name="motors_encoders_factor_spinner" style="width:4em"/><br>
+						
+					</td>
+					<td>
+						If motors encoders are activated, motors speed is multiplied by motors encoder factor <br>
+						If no encoders it MUST be false <br>
+						Robot will increase his speed DANGEROUSLY if true with no encoders !!!!!!!!!!!
+					</td>
+				</tr>
+				
+				<tr>
+					<td>
+						<br><br>
+						<input type="button" Value="Save" onClick="saveControllerOptions()" class = "btn btn-danger"/>
+					</td>
+				</tr>
+			
+			</table>
+		
+		
+		</div>
+		
+	</div>
+  
+  
+
+
+</body>
+</html>

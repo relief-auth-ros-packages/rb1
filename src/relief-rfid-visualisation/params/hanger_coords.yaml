@@ -1,0 +1,6 @@
+# All we need are the two points representing the
+# two footprint points of the main frame
+hanger_coords: [
+  [10.4122171402,8.28082847595],
+  [11.2109537125,8.24130725861]
+]

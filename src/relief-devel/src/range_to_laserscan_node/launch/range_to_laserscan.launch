@@ -1,0 +1,16 @@
+<launch>
+  <!-- Convert the front sonar's sensor_msgs/Range message to type sensor_msgs/LaserScan -->
+  <node pkg="relief_devel" name="range_to_laserscan_node_front" type="range_to_laserscan_node" output="screen" >
+    <rosparam file="$(find relief_devel)/src/range_to_laserscan_node/configuration_files/params.yaml" command="load" />
+    <param name="range_topic_in"      value="/front_sonar/range" />
+    <param name="laserscan_topic_out" value="/front_sonar/scan/range" />
+  </node>
+
+  <!-- Convert the back sonar's sensor_msgs/Range message to type sensor_msgs/LaserScan -->
+  <node pkg="relief_devel" name="range_to_laserscan_node_back" type="range_to_laserscan_node" output="screen" >
+    <rosparam file="$(find relief_devel)/src/range_to_laserscan_node/configuration_files/params.yaml" command="load" />
+    <param name="range_topic_in"      value="/back_sonar/range" />
+    <param name="laserscan_topic_out" value="/back_sonar/scan/range" />
+  </node>
+
+</launch>

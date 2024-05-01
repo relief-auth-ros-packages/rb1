@@ -1,0 +1,8 @@
+image: vergina3_0.01.pgm
+resolution: 0.010000
+#origin: [-6.637031, -5.909883, 0.000000]
+origin: [0,0,0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

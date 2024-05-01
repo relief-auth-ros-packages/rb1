@@ -1,0 +1,32 @@
+<launch>
+
+  <!-- Initial position -->
+  <arg name="initial_pose_x" />
+  <arg name="initial_pose_y" />
+  <arg name="initial_pose_yaw" />
+  <arg name="num_cameras" />
+
+
+  <!-- rb1 urdf -->
+  <arg name="prefix"    default="/"/>
+  <arg if="$(eval num_cameras == 1)" name="urdf_file" default="$(find xacro)/xacro.py '$(find rb1_base_description)/robots/versions/rb1_base_RELIEF_one_camera.urdf.xacro'    prefix:=$(arg prefix) --inorder" />
+  <arg if="$(eval num_cameras == 3)" name="urdf_file" default="$(find xacro)/xacro.py '$(find rb1_base_description)/robots/versions/rb1_base_RELIEF_three_cameras.urdf.xacro' prefix:=$(arg prefix) --inorder" />
+
+  <param name="robot_description" command="$(arg urdf_file)" />
+
+  <!-- Gazebo model spawner -->
+  <node name="spawn_rb1_model" pkg="gazebo_ros" type="spawn_model"
+    args="$(optenv ROBOT_INITIAL_POSE) -unpause -urdf -param robot_description -x $(arg initial_pose_x) -y $(arg initial_pose_y) -z 0 -R 0 -P 0 -Y $(arg initial_pose_yaw) -model mobile_base"/>
+
+  <!-- Robot state publisher -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"	respawn="false" output="screen">
+    <remap from="/joint_states" to="joint_states" />
+  </node>
+
+  <!-- start rb1_base_control nodes -->
+  <include file="$(find rb1_base_control)/launch/rb1_base_control.launch">
+    <arg name="prefix"        value="$(arg prefix)"/>
+    <arg name="sim"           value="true"/>
+  </include>
+
+</launch>

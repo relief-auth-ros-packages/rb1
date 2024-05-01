@@ -1,0 +1,8 @@
+image: csal_karto3_0.01.pgm
+resolution: 0.010000
+#origin: [-19.680109, -8.628347, 0.000000]
+origin: [0.0, 0.0, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

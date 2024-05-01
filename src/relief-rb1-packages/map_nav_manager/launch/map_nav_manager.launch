@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+
+<launch>
+	
+  <arg name="global_frame_id"           default="/rb2_base_map"/>
+  <arg name="poi_marker_name"           default="poi_interactive_marker"/>
+  <arg name="person_marker_name"        default="person_marker"/>
+  <arg name="poi_topic_marker_name"     default="poi_interactive_marker"/>
+  <arg name="person_topic_marker_name"  default="person_followed_marker"/>
+  <arg name="init_pose_topic_name"      default="initialpose"/>
+  <arg name="goto_planner"              default="robot_local_control/NavigationComponent/GoToComponent"/>
+  <arg name="map_nav_config"            default="$(find map_nav_manager)/config/map_nav_manager.yaml"/>
+  <arg name="use_rlc"                   default="false"/>
+  <arg name="cart_marker_name"          default="cart_marker"/>
+  <arg name="cart_topic_marker_name"    default="two_tag_laser_locator_node/cart_detected_marker"/>
+  <arg name="cart_frame_id"             default="laser_cart"/>
+    
+
+  <node name="map_nav_manager" pkg="map_nav_manager" type="map_nav_manager_node.py" output="screen">
+	<rosparam file="$(arg map_nav_config)" command="load"/>
+    	<param name="map_nav_config" value="$(arg map_nav_config)"/>
+  </node>
+
+  <node name="$(arg poi_marker_name)" pkg="map_nav_manager" type="poi_marker.py" output="screen">
+    <param name="frame_id"              value="$(arg global_frame_id)"/>
+    <param name="init_pose_topic_name"  value="$(arg init_pose_topic_name)"/>
+    <param name="goto_planner"          value="$(arg goto_planner)" if="$(arg use_rlc)"/>	
+    <param name="use_rlc"               value="$(arg use_rlc)"/>
+  </node>	
+
+  <node name="$(arg poi_marker_name)_proxy" pkg="interactive_marker_proxy" args="topic_ns:=$(arg poi_topic_marker_name) target_frame:=/$(arg global_frame_id)" type="proxy"/>
+ 	
+  <node name="$(arg person_marker_name)_proxy" pkg="interactive_marker_proxy" args="topic_ns:=$(arg person_topic_marker_name) target_frame:=/$(arg global_frame_id)" type="proxy"/>
+ 	
+  <node name="$(arg cart_marker_name)_proxy" pkg="interactive_marker_proxy" args="topic_ns:=$(arg cart_topic_marker_name) target_frame:=/$(arg cart_frame_id)" type="proxy"/>
+ 
+</launch>

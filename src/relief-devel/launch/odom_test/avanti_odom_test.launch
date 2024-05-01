@@ -1,0 +1,40 @@
+<launch>
+
+  <!-- corridor | willowgarage-->
+  <arg name="gazebo_world"  default="corridor" />
+
+  <!-- navfn | globalplanner | sbpl -->
+  <arg name="gp"            default="globalplanner" />
+
+  <!-- dwa | eband | teb -->
+  <arg name="lp"            default="teb" />
+
+  <!-- exploration is unnecessary -->
+  <arg name="use_explorer"  value="false" />
+
+  <!-- visualisation is unnecessary -->
+  <arg name="do_viz"        value="true" />
+
+  <arg name="robot_type"    value="rb1" />
+
+  <arg name="env_mode"      default="live" />
+
+
+
+  <!-- launch experiment -->
+  <include file="$(find relief_devel)/launch/avanti_simulation.launch" if="$(eval env_mode == 'simulation')">
+    <arg name="gazebo_world"  value="$(arg gazebo_world)" />
+    <arg name="gp"            value="$(arg gp)" />
+    <arg name="lp"            value="$(arg lp)" />
+    <arg name="use_explorer"  value="$(arg use_explorer)" />
+    <arg name="do_viz"        value="$(arg do_viz)" />
+    <arg name="robot_type"    value="$(arg robot_type)" />
+  </include>
+
+  <!-- Launch logger -->
+  <node name="odom_tests_node" pkg="relief_devel" type="odom_tests_node" output="screen">
+    <param name="odom_filename"  value="$(find relief_devel)/src/odom_tests_node/odom_test" />
+    <param name="odom_topic"     value="/robotnik_base_control/odom" />
+  </node>
+
+</launch>

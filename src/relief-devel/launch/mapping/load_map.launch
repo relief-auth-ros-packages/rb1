@@ -1,0 +1,6 @@
+<launch>
+  <arg name="map_file" />
+  <arg name="map_resolution" />
+
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find relief_devel)/maps/$(arg map_file)_$(arg map_resolution).pgm $(arg map_resolution)" />
+</launch>

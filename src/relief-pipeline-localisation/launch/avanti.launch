@@ -1,0 +1,66 @@
+<launch>
+
+  <!-- corridor | willowgarage-->
+  <arg name="gazebo_world"  default="warehouse_karto" />
+
+  <!-- true | false -->
+  <arg name="gazebo_gui"    default="false" />
+
+  <!-- turtlebot | rb1-->
+  <arg name="robot_type"    default="rb1" />
+
+  <!-- navfn | globalplanner | sbpl -->
+  <arg name="gp"            value="globalplanner" />
+
+  <!-- dwa | eband | teb -->
+  <arg name="lp"            value="teb" />
+
+  <!-- exploration is unnecessary -->
+  <arg name="use_explorer"  value="false" />
+
+  <!-- visualisation is not necessarily necessary -->
+  <arg name="do_viz"        default="true" />
+
+  <!-- Use bag or live simulation -->
+  <arg name="use_bag"       default="false" />
+
+
+  <!-- launch world, robot, etc -->
+  <group unless="$(arg use_bag)">
+    <include file="$(find relief_devel)/launch/avanti_simulation.launch">
+      <arg name="gazebo_world"  value="$(arg gazebo_world)" />
+      <arg name="gazebo_gui"    value="$(arg gazebo_gui)" />
+      <arg name="robot_type"    value="$(arg robot_type)" />
+      <arg name="gp"            value="$(arg gp)" />
+      <arg name="lp"            value="$(arg lp)" />
+      <arg name="use_explorer"  value="$(arg use_explorer)" />
+      <arg name="do_viz"        value="$(arg do_viz)" />
+    </include>
+  </group>
+
+  <group if="$(arg use_bag)">
+    <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(find pipeline_evaluator)/bags/$(arg robot_type)_$(arg gazebo_world).bag" />
+
+    <arg name="initial_pose_x"   value="11.56"   if="$(eval gazebo_world == 'corridor')" />
+    <arg name="initial_pose_y"   value="12.2"    if="$(eval gazebo_world == 'corridor')" />
+    <arg name="initial_pose_yaw" value="0.0"     if="$(eval gazebo_world == 'corridor')" />
+
+    <include file="$(find relief_devel)/launch/localisation/amcl.launch">
+      <arg name="robot_type"        value="$(arg robot_type)" />
+
+      <arg name="initial_pose_x"    value="$(arg initial_pose_x)" />
+      <arg name="initial_pose_y"    value="$(arg initial_pose_y)" />
+      <arg name="initial_pose_yaw"  value="$(arg initial_pose_yaw)" />
+    </include>
+
+    <node name="rviz" pkg="rviz" type="rviz" output="log" args="-d $(find relief_devel)/configuration_files/rviz/relief_devel_$(arg gp)_$(arg lp).rviz" if="$(arg do_viz)" />
+  </group>
+
+
+  <!-- Execute pipeline -->
+  <include file="$(find relief_pipeline_localisation)/launch/relief_pipeline_localisation.launch">
+    <arg name="gazebo_world"                  value="$(arg gazebo_world)" />
+    <arg name="robot_type"                    value="$(arg robot_type)" />
+  </include>
+
+</launch>

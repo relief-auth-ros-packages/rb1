@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+	<node pkg="robotnik_safety_controller" type="robotnik_laser_protection_areas_node" name="robotnik_laser_protection_areas_node" output="screen">
+		<remap from="odom" to="summit_xl_control/odom"/>
+		<remap from="cmd_vel" to="summit_xl_control/cmd_vel" />
+		<remap from="io" to="robotnik_base_hw/io"/>
+		<param name="io_service_name" value="/summit_xl/robotnik_base_hw/set_digital_output"/>
+		<param name="output_logic_0" value="false"/> <!-- inverted logic -->
+		<param name="output_logic_1" value="false"/> <!-- inverted logic -->
+	</node>
+</launch>

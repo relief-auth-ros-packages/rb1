@@ -1,0 +1,286 @@
+<launch>
+
+  <!-- Init args -->
+
+  <!-- Available values for robot_type: {turtlebot|rb1}-->
+  <arg name="robot_type"              value="$(env ROBOT_TYPE)" />
+
+  <!-- Available values for do_robot_bringup: {true|false} -->
+  <arg name="do_robot_bringup"        default="false"/>
+
+  <!-- Available values for task: {localisation|mapping} -->
+  <arg name="task"                    default="localisation"/>
+
+  <!-- Available values for slam_alg: {karto|gmapping|rtabmap} -->
+  <arg name="slam_alg"                default="karto"     if="$(eval task == 'mapping')"/>
+
+  <!-- Number of cameras used for 3D SLAM -->
+  <arg name="num_cameras"             default="$(env NUM_CAMERAS)" />
+
+  <!-- Available values for slam_alg: {karto|gmapping} -->
+  <arg name="slam_resolution"         default="0.01"      if="$(eval arg('task') == 'mapping' and (arg('slam_alg') == 'karto' or arg('slam_alg') == 'gmapping'))"/>
+  <arg name="slam_resolution"         default="0.01"      if="$(eval arg('task') == 'mapping' and arg('slam_alg') == 'rtabmap')"/>
+
+  <!-- Available values for gp (determines the global planner used): {navfn|globalplanner|sbpl} -->
+  <arg name="gp"                      default="globalplanner"/>
+
+  <!-- Available values for lp (determines the local planner used): {dwa|eband|teb} -->
+  <arg name="lp"                      default="teb"/>
+
+  <!-- Avalailable values for use_explorer: {true|false} -->
+  <arg name="use_explorer"            default="false" />
+
+  <!-- Avalailable values for use_viz {true|false} -->
+  <arg name="do_viz"                  default="false" />
+
+  <!-- If performing localisation (and therefore the map is known apriori),
+       set the map file name and its (given) resolution -->
+  <!-- autogeneration_checkpoint_1 -->
+  <arg name="map_file"                default="csal_gl_2023_rb1" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_gl_2023_rb1')" />
+  <arg name="map_resolution"          default="0.02"      if="$(eval map_file == 'csal_2022_12_19')" />
+  <arg name="map_resolution"          default="0.02"      if="$(eval map_file == 'vergina_22_12_06')" />
+  <arg name="map_resolution"          default="0.02"      if="$(eval map_file == 'mm')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'amth')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'amth_test')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'vergina_iv')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'vergina3')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'vergina2')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'vergina')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'beyond4')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_atrium_2021_11_04')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_atrium_176_tags')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_atrium_151_tags')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_balcony')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_atrium_demo')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_atrium_demo2')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_atrium_1')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_atrium_2')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_atrium_3')" />
+  <arg name="map_resolution"          default="0.02"      if="$(eval map_file == 'csal_karto')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_karto3')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_rtabmap_exp_f2f')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_10072020')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_24072020')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'csal_20201013')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'temp_thmmy_lib3')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'temp_thmmy_lib4')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'temp_thmmy_lib5')" />
+  <arg name="map_resolution"          default="0.01"      if="$(eval map_file == 'thmmy_lib_rb1')" />
+
+  <!-- Abstract the map's resolution for independence from task -->
+  <arg name="resolution"                value="$(arg map_resolution)"  if="$(eval task == 'localisation')" />
+  <arg name="resolution"                value="$(arg slam_resolution)" if="$(eval task == 'mapping')" />
+
+
+  <arg name="estimate_initial_pose_x"   value="10.890925" if="$(eval map_file == 'csal_gl_2023_rb1')"/>
+  <arg name="estimate_initial_pose_y"   value="7.7454"    if="$(eval map_file == 'csal_gl_2023_rb1')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_gl_2023_rb1')"/>
+
+  <arg name="estimate_initial_pose_x"   value="10.11"     if="$(eval map_file == 'csal_2022_12_19')"/>
+  <arg name="estimate_initial_pose_y"   value="14.32"     if="$(eval map_file == 'csal_2022_12_19')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_2022_12_19')"/>
+
+  <arg name="estimate_initial_pose_x"   value="10.11"     if="$(eval map_file == 'vergina_22_12_06')"/>
+  <arg name="estimate_initial_pose_y"   value="14.32"     if="$(eval map_file == 'vergina_22_12_06')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'vergina_22_12_06')"/>
+
+  <arg name="estimate_initial_pose_x"   value="10.771889" if="$(eval map_file == 'mm')"/>
+  <arg name="estimate_initial_pose_y"   value="6.572024"  if="$(eval map_file == 'mm')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'mm')"/>
+
+  <arg name="estimate_initial_pose_x"   value="24.771889" if="$(eval map_file == 'amth')"/>
+  <arg name="estimate_initial_pose_y"   value="46.572024" if="$(eval map_file == 'amth')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'amth')"/>
+
+  <arg name="estimate_initial_pose_x"   value="11.687977" if="$(eval map_file == 'amth_test')"/>
+  <arg name="estimate_initial_pose_y"   value="14.037730" if="$(eval map_file == 'amth_test')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'amth_test')"/>
+
+  <arg name="estimate_initial_pose_x"   value="12.950131" if="$(eval map_file == 'vergina')"/>
+  <arg name="estimate_initial_pose_y"   value="7.321933"  if="$(eval map_file == 'vergina')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'vergina')"/>
+
+  <arg name="estimate_initial_pose_x"   value="6.572210"  if="$(eval map_file == 'vergina2')"/>
+  <arg name="estimate_initial_pose_y"   value="6.565256"  if="$(eval map_file == 'vergina2')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'vergina2')"/>
+
+  <arg name="estimate_initial_pose_x"   value="6.637031"  if="$(eval map_file == 'vergina3')"/>
+  <arg name="estimate_initial_pose_y"   value="5.909883"  if="$(eval map_file == 'vergina3')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'vergina3')"/>
+
+  <arg name="estimate_initial_pose_x"   value="20.55"     if="$(eval map_file == 'vergina_iv')"/>
+  <arg name="estimate_initial_pose_y"   value="8.55"      if="$(eval map_file == 'vergina_iv')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'vergina_iv')"/>
+
+  <arg name="estimate_initial_pose_x"   value="8.636295"  if="$(eval map_file == 'csal_atrium_2021_11_04')"/>
+  <arg name="estimate_initial_pose_y"   value="9.308140"  if="$(eval map_file == 'csal_atrium_2021_11_04')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_atrium_2021_11_04')"/>
+
+  <arg name="estimate_initial_pose_x"   value="1.44438666211"  if="$(eval map_file == 'beyond4')"/>
+  <arg name="estimate_initial_pose_y"   value="12.0418862509"  if="$(eval map_file == 'beyond4')"/>
+  <arg name="estimate_initial_pose_yaw" value="-1.3301393"     if="$(eval map_file == 'beyond4')"/>
+
+  <arg name="estimate_initial_pose_x"   value="8.873205"  if="$(eval map_file == 'csal_atrium_176_tags')"/>
+  <arg name="estimate_initial_pose_y"   value="9.271685"  if="$(eval map_file == 'csal_atrium_176_tags')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_atrium_176_tags')"/>
+
+  <arg name="estimate_initial_pose_x"   value="7.982603"  if="$(eval map_file == 'csal_atrium_151_tags')"/>
+  <arg name="estimate_initial_pose_y"   value="10.547340" if="$(eval map_file == 'csal_atrium_151_tags')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_atrium_151_tags')"/>
+
+  <arg name="estimate_initial_pose_x"   value="17.85"   	if="$(eval map_file == 'csal_balcony')"/>
+  <arg name="estimate_initial_pose_y"   value="18.04"     if="$(eval map_file == 'csal_balcony')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_balcony')"/>
+
+  <arg name="estimate_initial_pose_x"   value="8.671616"	if="$(eval map_file == 'csal_atrium_demo')"/>
+  <arg name="estimate_initial_pose_y"   value="9.880291"  if="$(eval map_file == 'csal_atrium_demo')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_atrium_demo')"/>
+
+  <arg name="estimate_initial_pose_x"   value="8.724098"	if="$(eval map_file == 'csal_atrium_demo2')"/>
+  <arg name="estimate_initial_pose_y"   value="9.005742"  if="$(eval map_file == 'csal_atrium_demo2')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_atrium_demo2')"/>
+
+  <arg name="estimate_initial_pose_x"   value="10.054668"	if="$(eval map_file == 'csal_atrium_1')"/>
+  <arg name="estimate_initial_pose_y"   value="9.032365"  if="$(eval map_file == 'csal_atrium_1')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_atrium_1')"/>
+
+  <arg name="estimate_initial_pose_x"   value="9.512506"	if="$(eval map_file == 'csal_atrium_2')"/>
+  <arg name="estimate_initial_pose_y"   value="9.172270"  if="$(eval map_file == 'csal_atrium_2')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_atrium_2')"/>
+
+  <arg name="estimate_initial_pose_x"   value="12.995354"	if="$(eval map_file == 'csal_atrium_3')"/>
+  <arg name="estimate_initial_pose_y"   value="9.503902"  if="$(eval map_file == 'csal_atrium_3')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_atrium_3')"/>
+
+  <!--
+  <arg name="estimate_initial_pose_x"   value="11.89" 	  if="$(eval map_file == 'csal_karto')"/>
+  <arg name="estimate_initial_pose_y"   value="5.98"      if="$(eval map_file == 'csal_karto')"/>
+  <arg name="estimate_initial_pose_yaw" value="2.6662782" if="$(eval map_file == 'csal_karto')"/>
+  -->
+
+  <arg name="estimate_initial_pose_x"   value="15.281" 	  if="$(eval map_file == 'csal_karto')"/>
+  <arg name="estimate_initial_pose_y"   value="8.165"     if="$(eval map_file == 'csal_karto')"/>
+  <arg name="estimate_initial_pose_yaw" value="-2.74"     if="$(eval map_file == 'csal_karto')"/>
+
+  <arg name="estimate_initial_pose_x"   value="18.7" 	    if="$(eval map_file == 'csal_karto3')"/>
+  <arg name="estimate_initial_pose_y"   value="11.35"  	  if="$(eval map_file == 'csal_karto3')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.111"     if="$(eval map_file == 'csal_karto3')"/>
+
+
+  <arg name="estimate_initial_pose_x"   value="1.737893" 	if="$(eval map_file == 'csal_rtabmap_exp_1')"/>
+  <arg name="estimate_initial_pose_y"   value="5.522632"  if="$(eval map_file == 'csal_rtabmap_exp_1')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_rtabmap_exp_1')"/>
+
+  <arg name="estimate_initial_pose_x"   value="1.755429" 	if="$(eval map_file == 'csal_rtabmap_exp_2')"/>
+  <arg name="estimate_initial_pose_y"   value="6.870006"  if="$(eval map_file == 'csal_rtabmap_exp_2')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_rtabmap_exp_2')"/>
+
+  <arg name="estimate_initial_pose_x"   value="1.792231" 	if="$(eval map_file == 'csal_rtabmap_exp_3')"/>
+  <arg name="estimate_initial_pose_y"   value="6.862545"  if="$(eval map_file == 'csal_rtabmap_exp_3')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_rtabmap_exp_3')"/>
+
+  <arg name="estimate_initial_pose_x"   value="1.853803" 	if="$(eval map_file == 'csal_rtabmap_exp_b2b')"/>
+  <arg name="estimate_initial_pose_y"   value="7.074077"  if="$(eval map_file == 'csal_rtabmap_exp_b2b')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_rtabmap_exp_b2b')"/>
+
+  <arg name="estimate_initial_pose_x"   value="1.853803" 	if="$(eval map_file == 'csal_rtabmap_exp_b_single')"/>
+  <arg name="estimate_initial_pose_y"   value="7.074077"  if="$(eval map_file == 'csal_rtabmap_exp_b_single')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_rtabmap_exp_b_single')"/>
+
+  <arg name="estimate_initial_pose_x"   value="1.907281" 	if="$(eval map_file == 'csal_rtabmap_exp_fence')"/>
+  <arg name="estimate_initial_pose_y"   value="7.391065"  if="$(eval map_file == 'csal_rtabmap_exp_fence')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_rtabmap_exp_fence')"/>
+
+  <arg name="estimate_initial_pose_x"   value="1.859590" 	if="$(eval map_file == 'csal_rtabmap_exp_horizontal')"/>
+  <arg name="estimate_initial_pose_y"   value="7.208181"  if="$(eval map_file == 'csal_rtabmap_exp_horizontal')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_rtabmap_exp_horizontal')"/>
+
+  <arg name="estimate_initial_pose_x"   value="2.028963" 	if="$(eval map_file == 'csal_rtabmap_exp_f2f')"/>
+  <arg name="estimate_initial_pose_y"   value="7.478061"  if="$(eval map_file == 'csal_rtabmap_exp_f2f')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_rtabmap_exp_f2f')"/>
+
+  <arg name="estimate_initial_pose_x"   value="2.028963" 	if="$(eval map_file == 'ag10')"/>
+  <arg name="estimate_initial_pose_y"   value="7.478061"  if="$(eval map_file == 'ag10')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'ag10')"/>
+
+  <arg name="estimate_initial_pose_x"   value="5.141746" 	if="$(eval map_file == 'csal_072020')"/>
+  <arg name="estimate_initial_pose_y"   value="4.631497"  if="$(eval map_file == 'csal_072020')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"       if="$(eval map_file == 'csal_072020')"/>
+
+  <arg name="estimate_initial_pose_x"   value="10.027511" 	if="$(eval map_file == 'csal_10072020')"/>
+  <arg name="estimate_initial_pose_y"   value="11.418036"   if="$(eval map_file == 'csal_10072020')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'csal_10072020')"/>
+
+  <arg name="estimate_initial_pose_x"   value="4.385493"  	if="$(eval map_file == 'csal_24072020')"/>
+  <arg name="estimate_initial_pose_y"   value="1.990023"    if="$(eval map_file == 'csal_24072020')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'csal_24072020')"/>
+
+  <arg name="estimate_initial_pose_x"   value="3.484059"  	if="$(eval map_file == 'csal_20201013')"/>
+  <arg name="estimate_initial_pose_y"   value="3.175377"    if="$(eval map_file == 'csal_20201013')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'csal_20201013')"/>
+
+  <arg name="estimate_initial_pose_x"   value="2.062463"  	if="$(eval map_file == 'temp_thmmy_lib3')"/>
+  <arg name="estimate_initial_pose_y"   value="6.674463"    if="$(eval map_file == 'temp_thmmy_lib3')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'temp_thmmy_lib3')"/>
+
+  <arg name="estimate_initial_pose_x"   value="4.496187"  	if="$(eval map_file == 'temp_thmmy_lib4')"/>
+  <arg name="estimate_initial_pose_y"   value="8.037551"    if="$(eval map_file == 'temp_thmmy_lib4')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'temp_thmmy_lib4')"/>
+
+  <arg name="estimate_initial_pose_x"   value="4.075465"  	if="$(eval map_file == 'temp_thmmy_lib5')"/>
+  <arg name="estimate_initial_pose_y"   value="6.912595"    if="$(eval map_file == 'temp_thmmy_lib5')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'temp_thmmy_lib5')"/>
+
+  <arg name="estimate_initial_pose_x"   value="8.430229"  	if="$(eval map_file == 'thmmy_lib_rb1')"/>
+  <arg name="estimate_initial_pose_y"   value="5.317374"    if="$(eval map_file == 'thmmy_lib_rb1')"/>
+  <arg name="estimate_initial_pose_yaw" value="0.0"         if="$(eval map_file == 'thmmy_lib_rb1')"/>
+  <!-- autogeneration_checkpoint_2 -->
+
+  <!-- ********************************************************************* -->
+  <!-- Launch robot -->
+  <include file="$(find relief_devel)/launch/robot/$(arg robot_type)_bringup_live.launch" if="$(arg do_robot_bringup)"/>
+
+  <!-- ********************************************************************* -->
+  <!-- Launch either localisation or mapping -->
+  <include file="$(find relief_devel)/launch/$(arg task)/$(arg task).launch">
+    <arg name="robot_type"            value="$(arg robot_type)"/>
+    <arg name="resolution"            value="$(arg resolution)" />
+
+    <arg name="slam_alg"              value="$(arg slam_alg)"                   if="$(eval task == 'mapping')" />
+    <arg name="num_cameras"           value="$(arg num_cameras)"                if="$(eval task == 'mapping' and arg('slam_alg') == 'rtabmap')" />
+
+    <arg name="map_file"              value="$(arg map_file)"                   if="$(eval task == 'localisation')" />
+
+    <arg name="initial_pose_x"        value="$(arg estimate_initial_pose_x)"    if="$(eval task == 'localisation')" />
+    <arg name="initial_pose_y"        value="$(arg estimate_initial_pose_y)"    if="$(eval task == 'localisation')" />
+    <arg name="initial_pose_yaw"      value="$(arg estimate_initial_pose_yaw)"  if="$(eval task == 'localisation')" />
+  </include>
+
+  <!-- ********************************************************************* -->
+  <!-- Load navigation (move_base, global and local planner)-->
+  <include file="$(find relief_devel)/launch/navigation/navigation.launch" >
+    <arg name="robot_type"            value="$(arg robot_type)"/>
+    <arg name="num_cameras"           value="$(arg num_cameras)" />
+    <arg name="gp"                    value="$(arg gp)"/>
+    <arg name="lp"                    value="$(arg lp)"/>
+    <arg name="task"                  value="$(arg task)"/>
+    <arg name="resolution"            value="$(arg resolution)" />
+  </include>
+
+  <!-- ********************************************************************* -->
+  <!-- Load frontier explorer -->
+  <group if="$(arg use_explorer)">
+    <include file="$(find relief_devel)/launch/exploration/frontier_exploration.launch">
+      <arg name="task"                  value="$(arg task)"/>
+    </include>
+
+    <!-- Run rviz marker replacement for triggering rviz-less exploration -->
+    <node pkg="relief_devel" name="marker_replacement_node" type="marker_replacement_node" output="screen" />
+  </group>
+
+  <!-- ********************************************************************* -->
+  <!-- Load visualisation -->
+  <node name="rviz" pkg="rviz" type="rviz" output="log" args="-d $(find relief_devel)/configuration_files/rviz/relief_devel_$(arg gp)_$(arg lp).rviz" if="$(arg do_viz)" />
+
+</launch>

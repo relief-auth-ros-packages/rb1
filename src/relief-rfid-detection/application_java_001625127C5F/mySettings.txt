@@ -1,0 +1,18 @@
+hostname (reader address) e.g 192.168.1.5
+192.168.0.192
+mac address, capital letters, no ":"
+001625127C5F
+channel indexes eg. 1,4,3 (seperated with ",", no spaces)
+4
+antennas eg. 1,4,3 (seperated with ",", no spaces)
+2
+txpower in dbm, must be the same size as antennas, and in the same order
+30
+rfmode eg 0, 1003 etc. only ONE value
+0
+search = single value eg. dual, dualBA, single
+dual
+session
+1
+population = tag population estimation
+32

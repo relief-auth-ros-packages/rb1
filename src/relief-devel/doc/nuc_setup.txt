@@ -1,0 +1,71 @@
+This file documents all steps that need to be taken so that a void nuc pc
+(or else) can be set up to use all packages and exhibit all intended
+functionality documented in project RELIEF.
+
+################################################################################
+1. Setup linux ubuntu 16.04
+  a.
+    We assume that:
+    name: relief
+    computer-name: relief-nuc-0
+    username: relief-user0
+    user password:
+    root password:
+
+  b. $ sudo apt install vim git
+
+################################################################################
+2. Setup static ip
+  a. open /run/network/ifstate (as root) and add wlp58s0=wlp58s0
+     (or the whichever is the equivalent wireless interface name; use iwconfig
+      to identify it)
+  b. $ sudo apt install wpasupplicant
+  c. open /etc/network/interfaces (as root), and add the following:
+     auto wlp58s0
+     iface wlp58s0 inet static
+     address 192.168.0.196
+     netmask 255.255.255.0
+     network 192.168.0.0
+     broadcast 192.168.0.255
+     gateway 192.168.0.1
+     dns-nameservers 192.168.0.1 8.8.8.8
+     wpa-ssid CSAL_5G
+     wpa-psk thmmy-e!
+
+     This configuration is only valid for the wireless network CSAL_5G in
+     AUTh's CSAL lab. Modify as needed.
+
+################################################################################
+3. Setup SSH
+  a. $ sudo apt install openssh-server
+  b. modify port
+  c. disable plain text password authentication
+  d. setup ssh keys in remote computer and dump public key into
+     ~/.ssh/authorized_keys. See for instance
+     https://www.cyberciti.biz/faq/how-to-set-up-ssh-keys-on-linux-unix/
+
+################################################################################
+4. Setup ROS
+  a. goto wiki.ros.org/kinetic/Installation/Ubuntu and follow the instructions
+  b. append the content of
+     https://gist.github.com/li9i/72b8ed611e3dc5b079895104cd7737e3
+     to nuc's ~/.bashrc
+  c. $ sudo apt install python_catkin_tools
+     (makes use of catkin build rather than catkin_make)
+  d. $ sudo apt install ros-kinetic-csm (for scan-matching)
+  e. $ sudo apt install libfftw3-bin libfftw3-dev
+     (for the pipeline-localisation's DFT step)
+  f. get private key for ssh authentication on github; otherwise cloning
+     relief-related repositories is impossible
+  g. goto ~/catkin_ws/src
+     $ git clone git@github.com:robotics-4-all/relief-devel.git
+     $ git clone git@github.com:robotics-4-all/relief-amcl-mod.git
+  h. $ catkin_build
+  i. $ sudo apt install ros-kinetic-turtlebot
+  j. $ . /opt/ros/indigo/setup.bash
+     $ rosrun kobuki_ftdi create_udev_rules
+  k. $ sudo apt-get install chrony ntpdate
+     $ ntpdate ntp.ubuntu.com
+  l. sudo chmod 666 /dev/ttyUSB0 (gives access to the laser)
+     for the rplidar -- check https://github.com/robopeak/rplidar_ros/wiki
+

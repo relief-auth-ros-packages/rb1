@@ -1,0 +1,8 @@
+image: fmt_warehouse_karto_0.01.pgm
+resolution: 0.010000
+#origin: [-2.083190, -3.015576, 0.000000]
+origin: [0.0, 0.0, 0.000000]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

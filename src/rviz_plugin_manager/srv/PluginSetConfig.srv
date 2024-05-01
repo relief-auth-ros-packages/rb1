@@ -1,0 +1,12 @@
+int64 plugin_uid
+
+# YAML config string of a display plugin
+string config
+
+---
+
+# return call status
+#   0: success 
+#  -1: error
+int16 code     
+string message

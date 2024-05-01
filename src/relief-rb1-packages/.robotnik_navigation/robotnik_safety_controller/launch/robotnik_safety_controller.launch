@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+	<node pkg="robotnik_safety_controller" type="robotnik_safety_controller" name="robotnik_safety_controller">
+		<remap from="cmd_vel_in" to="/robotnik_safety_controller/cmd_vel"/>
+		<remap from="cmd_vel_out" to="/cmd_vel"/>
+	</node>
+</launch>

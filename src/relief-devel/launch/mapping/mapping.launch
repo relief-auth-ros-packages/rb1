@@ -1,0 +1,14 @@
+<launch>
+
+  <arg name="slam_alg" />
+  <arg name="num_cameras" />
+  <arg name="resolution" />
+  <arg name="robot_type" />
+
+  <include file="$(find relief_devel)/launch/mapping/$(arg slam_alg).launch">
+    <arg name="resolution"  value="$(arg resolution)"/>
+    <arg name="robot_type"  value="$(arg robot_type)" />
+    <arg name="num_cameras" value="$(arg num_cameras)"    if="$(eval slam_alg == 'rtabmap')" />
+  </include>
+
+</launch>

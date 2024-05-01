@@ -1,0 +1,22 @@
+<launch>
+
+  <arg name="robot_type" />
+  <arg name="resolution" />
+  <arg name="num_cameras" />
+
+  <include file="$(find relief_devel)/launch/mapping/rtabmap_one_camera.launch" if="$(eval num_cameras == 1)">
+    <arg name="resolution"  value="$(arg resolution)"/>
+    <arg name="robot_type"  value="$(arg robot_type)" />
+  </include>
+
+  <include file="$(find relief_devel)/launch/mapping/rtabmap_two_cameras.launch" if="$(eval num_cameras == 2)">
+    <arg name="resolution"  value="$(arg resolution)"/>
+    <arg name="robot_type"  value="$(arg robot_type)" />
+  </include>
+
+  <include file="$(find relief_devel)/launch/mapping/rtabmap_three_cameras.launch" if="$(eval num_cameras == 3)">
+    <arg name="resolution"  value="$(arg resolution)"/>
+    <arg name="robot_type"  value="$(arg robot_type)" />
+  </include>
+
+</launch>

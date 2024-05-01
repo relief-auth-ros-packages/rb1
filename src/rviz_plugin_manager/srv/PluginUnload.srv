@@ -1,0 +1,9 @@
+int64 plugin_uid
+
+---
+
+# return call status
+#   0: success 
+#  -1: error
+int16 code     
+string message

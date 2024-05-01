@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>Robotnik Graphical User Interface</title>
+  <meta name="description" content="Robotnik Graphical User Interface to manage robots.">
+  <meta name="keywords" content="Robotnik GUI robots interface">
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/common.css" rel="stylesheet">
+  <link href="css/theme.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/bootOver.css">
+  <link rel="stylesheet" href="css/jquery-ui.css">
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/three.js"></script>
+  <script type="text/javascript" src="js/STLLoader.js"></script>
+  <script type="text/javascript" src="js/eventemitter2.js"></script>
+  <script type="text/javascript" src="js/easeljs.min.js"></script>
+  <script type="text/javascript" src="js/ros3d.js"></script>
+  <script type="text/javascript" src="js/nav2d.js"></script>
+  <script type="text/javascript" src="js/roslib.js"></script>
+  <script type="text/javascript" src="js/ros2d.js"></script>
+  <!--WARNING! THE IMPORT OF COLLADALOADER MUST BE DONE AFTER THE ROS3D.JS IMPORT otherwise the model is not shown correctly-->
+  <script type="text/javascript" src="js/ColladaLoader.js"></script>
+  <script type="text/javascript" src="js/global_config.js"></script>
+  <script type="text/javascript" src="js/common.js"></script>
+  <script type="text/javascript" src="js/status.js"></script>
+  <script type="text/javascript" src="js/robot_local_control.js"></script>
+  <script type="text/javascript" src="js/follower.js"></script>
+  <script type="text/javascript" src="js/jquery-ui-1.10.4.min.js"></script>
+  <script type="text/javascript" src="js/jquery.easing.js"></script>
+  <!--script type="text/javascript" src="js/mapping.js"></script-->
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
+  <link rel="icon" href="images/favicon.ico"> </head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-md bg-light fixed-top navbar-light" id="mainnavbar">
+    <div class="container mx-4">
+      <a href="http://www.robotnik.eu/">
+        <img width="150" src="images/logo-robotnik.png" class="float-left"> </a>
+      <button class="navbar-toggler navbar-toggler-right " type="button" data-toggle="collapse" data-target="#navbar3SupportedContent" aria-controls="navbar3SupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbar3SupportedContent">
+        <ul class="navbar-nav">
+          <li class="nav-item mx-4">
+            <a class="nav-link text-dark js-scroll-trigger" href="#TOP">DISPLAY</a>
+          </li>
+          <li class="nav-item mx-4">
+            <a class="nav-link text-dark js-scroll-trigger" href="#STATUS">STATUS</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- display -->
+  <div class="column bg-light" id="TOP">
+    <h3></h3>
+    <p>
+      <br>
+      <br>
+      <br> </p>
+  </div>
+  <div class="column bg-light text-dark">
+    <div class="col-md-8 col-lg-7 col-xl-9 col-xs-7">
+      <div class="panel panel-danger">
+        <div class="panel-heading"> 3D Map Visualization</div>
+        <table id="button_table" class="table">
+          <tbody>
+            <div class="panel-body" id="occupancygrid"></div>
+          </tbody>
+        </table>
+        <div class="row justify-content-center">
+
+          <button type="button" class="btn btn-danger btn-lg" id="button_zoom_in"> <span class="glyphicon glyphicon-minus"></span> </button>
+     
+          <button type="button" class="btn btn-danger btn-lg" id="button_zoom_out"> <span class="glyphicon glyphicon-plus"></span> </button>
+      
+          <button type="button" class="btn btn-danger btn-lg" id="button_move"> <span class="glyphicon glyphicon-move"></span> </button>
+    
+          <button type="button" class="btn btn-danger btn-lg" id="button_focus" disabled> <span class="glyphicon glyphicon-screenshot"></span> </button>
+  
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-5 col-xl-3 col-xs-5">
+        <div class="panel panel-danger table-responsive" id="robot_local_control" style="display: none">
+            <div class="panel-heading">Robot Local Control</div>
+            <!--div class="col-md-6 col-lg-6 col-xl-6 col-xs-6">
+              <div class="panel-body text-dark" style="height:80px">
+                <button type="button" class="btn btn-light btn-lg btn-block" onClick="changeControlMode(this.id)" id="manualButton" style="height:100%; font-size:12px" >MANUAL</button>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-6 col-xl-6 col-xs-6">
+              <div class="panel-body text-dark" style="height:80px">
+                <button type="button" class="btn btn-light btn-lg btn-block" onClick="changeControlMode(this.id)" id="autoButton" style="height:100%; font-size:12px">AUTO</button>
+              </div>
+            </div-->            
+            <div class="col-md-12 col-lg-12 col-xl-12 col-xs-12">
+              <div class="panel-body text-dark" style="height:80px">
+                <button type="button" class="btn btn-danger btn-lg btn-block" onclick="confirmPickProcedure()" style="height:100%; font-size:20px" id="button_pick_procedure">PICK</button>
+              </div>
+            </div>
+            <div class="col-md-12 col-lg-12 col-xl-12 col-xs-12">
+              <div class="panel-body text-dark" style="height:80px">
+                <button type="button" class="btn btn-danger btn-lg btn-block" onclick="confirmPlaceProcedure()" style="height:100%; font-size:20px" id="button_place_procedure">PLACE</button>
+              </div>
+            </div>
+            <br>
+            <div class="panel-body table-responsive">
+              <table id="button_table" class="table">
+                <tbody>   
+                  <tr>
+                    <td><label id="following_status" style="height:90%; font-size:15px" class="text-center">Following: </label> </td>
+                    <td>
+                      <button type="button" class="btn btn-success btn-lg" onclick="startFollowing()" id="button_start_following"> <span class="glyphicon glyphicon-play"></span> </button>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-danger btn-lg" onclick="stopFollowing()" id="button_stop_following"> <span class="glyphicon glyphicon-stop"></span> </button>
+                    </td>
+                  </tr>
+                  <tr>         
+                     <button type="button" class="btn btn-warning btn-lg btn-block" onclick="InitPersonDetector()" style="height:80%; width: 100%; font-size:15px" id="button_init_follower">SELECT PERSON TO FOLLOW</button>
+                  </tr>
+                </tbody>
+              </table>
+             </div>
+        </div>
+        <div class="panel panel-danger ">
+        <div class="panel-heading"> Control Panel</div>
+        <div class="panel-body table-responsive">
+          <table id="button_table" class="table">
+            <tbody>              
+              <tr>
+                <td><label id="mapping_status" class="text-center">Mapping: </label> </td>
+                <td>
+                  <button type="button" class="btn btn-success btn-lg" onclick="startMapping()" id="button_start_mapping"> <span class="glyphicon glyphicon-play"></span> </button>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-danger btn-lg" onclick="stopMapping()" id="button_stop_mapping"> <span class="glyphicon glyphicon-stop"></span> </button>
+                </td>
+              </tr>
+              <tr>
+                <td> <label for="text" class="text-dark">Map name: </label>
+                  <input type="text" id="filename" placeholder="default_map_name">
+                  <div class="form-check mb-2 mr-sm-2 mb-sm-0"> <label class="form-check-label text-dark">
+                        <input class="form-check-input" type="checkbox" id="checkbox_map_default" value="on"> 
+                            Use this map by default 
+                    </label> </div>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-warning btn-lg" onclick="saveMap()" id="button_save_map"> <span class="glyphicon glyphicon-save"></span> </button>
+                </td>
+              </tr>
+              <tr>
+                <td><label id="map_server_status" class="text-center">Map Server: </label> </td>
+                <td>
+                  <button type="button" class="btn btn-success btn-lg" onclick="startMapServer()" id="button_start_map_server"> <span class="glyphicon glyphicon-play"></span> </button>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-danger btn-lg" onclick="stopMapServer()" id="button_stop_map_server"> <span class="glyphicon glyphicon-stop"></span></button>
+                </td>
+              </tr>
+              <tr>
+                <td><label id="localization_status" class="text-center">Localization: </label> </td>
+                <td>
+                  <button type="button" class="btn btn-success btn-lg" width="100" alt="" align="middle" onclick="startLocalization()" id="button_start_localization"> <span class="glyphicon glyphicon-play" aria-hidden="true"></span> </button>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-danger btn-lg" width="100" alt="" align="middle" onclick="stopLocalization()" id="button_stop_localization"> <span class="glyphicon glyphicon-stop" aria-hidden="true"></span></button>
+                </td>
+              </tr>
+              <tr>
+                <td><label id="navigation_status" class="text-center">Navigation: </label> </td>
+                <td>
+                  <button type="button" class="btn btn-success btn-lg" width="" alt="" align="middle" onclick="startNavigation()" id="button_start_navigation"> <span class="glyphicon glyphicon-play" aria-hidden="true"></span> </button>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-danger btn-lg" width="" alt="" align="middle" onclick="stopNavigation()" id="button_stop_navigation"> <span class="glyphicon glyphicon-stop" aria-hidden="true"></span> </button>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3"> <label class="form-check-label text-dark">
+                                <input class="form-check-input" type="checkbox" id="autorun_default" value="on"> 
+                                    Autorun MapServer + Localization + Navigation
+                            </label> </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      
+      <!--añadir aquí otro panel de POI xejemplo?-->
+    </div>
+    <!--Monitor/console-->
+    <div class="col-md-8 col-lg-7 col-xl-9 col-xs-7">
+        <div class="panel panel-danger table-responsive">
+          <div class="panel-heading"> Output Monitor</div>
+          <div class="panel-body"> <textarea class="noresize" id="monitor" style="min-width: 100%" rows="5" cols="42" readonly="">                Monitor output
+                </textarea> 
+          </div>
+        </div>
+      </div>
+    <!-- Robot Move Control-->
+    <div class="col-md-4 col-lg-5 col-xl-3 col-xs-5">
+        <div class="panel panel-danger table-responsive">
+            <div class="panel-heading"> Robot Move Control</div>
+            <div class="panel-body">
+              <table id="button_table" class="table">
+                <tbody>
+                  <tr>
+                    <td style="text-align:center" colspan="3">
+                      <button type="button" class="btn btn-light btn-lg" align="middle" onclick="Forward()" id="button_forward"> <span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="text-align:center">
+                      <button type="button" class="btn btn-light btn-lg" align="middle" onclick="Left()" id="button_left"> <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>
+                    </td>
+                    <td style="text-align:center">
+                      <button type="button" class="btn btn-light btn-lg" align="middle" onclick="StopRobot()" id="button_stop"> <span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button>
+                    </td>
+                    <td style="text-align:center">
+                      <button type="button" class="btn btn-light btn-lg" align="middle" onclick="Right()" id="button_right"> <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="text-align:center" color: "red"="" colspan="3">                  
+                      <button type="button" class="btn btn-light btn-lg" align="middle" onclick="Back()" id="button_back"> <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+        </div>
+    </div>
+    </div>
+
+  <!--STATUS-->
+  <div class="column bg-light" id="STATUS">
+    <h3></h3>
+    <p>
+      <br> </p>
+  </div>
+  <!--lo nuevo-->
+  <div class="column bg-light text-dark">
+    <!--first column-->
+    <div class="col-md-4 col-lg-4">
+      <div class="panel panel-danger table-responsive">
+        <div class="panel-heading"> Motor Status</div>
+        <div class="panel-body">
+          <table id="control_table" class="table">
+            <tbody>
+              <tr>
+                <td style="text-align:center"> Left Wheel</td>
+                <td style="text-align:center"> Right Wheel</td>
+              </tr>
+              <tr>
+                <td style="text-align:center">
+                  <div id="front_left_wheel_status"> <span>
+                                    </span></div>
+                </td>
+                <td style="text-align:center">
+                  <div id="front_right_wheel_status"> <span></span></div>
+                </td>
+              </tr>
+              <tr>
+                <td style="text-align:center">
+                  <input type="button" value="Flags" class="btn btn-danger btn-lg" id="button_flw"> </td>
+                <td style="text-align:center">
+                  <input type="button" value="Flags" class="btn btn-danger btn-lg" id="button_frw"> </td>
+              </tr>
+              
+            </tbody>
+          </table>
+          <!--flag windows-->
+          <br>
+          <div id="dialog_flw" title="Flags front left wheel"> Flags info:
+            <br> Flag is off
+            <br> <b>Flag is on</b>
+            <br> <ins>Flag has been activated before</ins>
+            <br>
+            <br>
+            <div id="flw_state">State = <span></span></div>
+            <div id="flw_status">Status = <span></span></div>
+            <br> Flags:
+            <div id="flw_status_words"><span></span></div>
+            <br> Driver flags:
+            <div id="flw_driver_status_words"><span></span></div>
+          </div>
+          <div id="dialog_frw" title="Flags front right wheel"> Flags info:
+            <br> Flag is off
+            <br> <b>Flag is on</b>
+            <br> <ins>Flag has been activated before</ins>
+            <br>
+            <br>
+            <div id="frw_state">State = <span></span></div>
+            <div id="frw_status">Status = <span></span></div>
+            <br> Flags:
+            <div id="frw_status_words"><span></span></div>
+            <br> Driver flags:
+            <div id="frw_driver_status_words"><span></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--second column-->
+    <div class="col-md-4 col-lg-4">
+      <div class="panel panel-danger table-responsive">
+        <div class="panel-heading"> Status</div>
+        <div class="panel-body">
+          <table border="0px" class="table">
+            <tbody>
+              <tr>
+                <td style="text-align:center"> IMU state </td>
+                <td style="text-align:center"> Battery State </td>
+                <td style="text-align:center"> IMU temperature </td>
+                <td style="text-align:center"> Stop Button </td>
+              </tr>
+              <tr>
+                <td style="text-align:center">
+                  <div id="imu_status"> <span></span></div>
+                </td>
+                <td style="text-align:center">
+                  <div id="battery_ok"> <span></span></div>
+                </td>
+                <td style="text-align:center">
+                  <div id="imu_temperature_alarm"> <span></span></div>
+                </td>
+                <td style="text-align:center">
+                  <div id="emergency_stop"> <span></span></div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4"> Battery Level </td>
+              </tr>
+              <tr>
+                <td colspan="4">
+                  <div id="progressbar_battery" style="width: 20em; float:left; margin-left:1em" class="ui-progressbar3 border border-primary"></div>
+                  <br> &nbsp;&nbsp; 0% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 25% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 50% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 75% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100%
+                  </td>
+              </tr>
+              <tr>
+                <td style="text-align:center" colspan="2"> GPS </td>
+                <td style="text-align:center" colspan="2"> IMU </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <div id="gps_latitude">Latitude = <span></span></div>
+                  <div id="gps_longitude">Longitude = <span></span></div>
+                  <div id="gps_altitude">Altitude = <span></span></div>
+                </td>
+                <td colspan="2" rowspan="3">
+                  <div id="imu_temperature" class="bg-light text-dark">IMU temperature = <span></span></div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!--third column-->
+    <div class="col-md-4 col-lg-4">
+      <div class="panel panel-danger table-responsive">
+        <div class="panel-heading"> Odometry</div>
+        <div class="panel-body">
+          <table id="button_table" class="table">
+            <tbody>
+              <tr>
+                <td style="width: 4em"></td>
+                <td style="text-align:center">x</td>
+                <td style="text-align:center">y</td>
+                <td style="text-align:center">z</td>
+              </tr>
+              <tr>
+                <td>Position</td>
+                <td style="width: 4em">
+                  <div id="odometry_position_x" style="float:right"><span></span></div>
+                </td>
+                <td style="width: 4em">
+                  <div id="odometry_position_y" style="float:right"><span></span></div>
+                </td>
+                <td style="width: 4em">
+                  <div id="odometry_position_z" style="float:right"><span></span></div>
+                </td>
+              </tr>
+              <tr>
+                <td>Orientation</td>
+                <td style="width: 4em">
+                  <div id="odometry_orientation_x" style="float:right"><span></span></div>
+                </td>
+                <td style="width: 4em">
+                  <div id="odometry_orientation_y" style="float:right"><span></span></div>
+                </td>
+                <td style="width: 4em">
+                  <div id="odometry_orientation_z" style="float:right"><span></span></div>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4" style="text-align:center">
+                  <input type="button" value="Reset odometry" onclick="reset_odometry()" class="btn btn-danger btn-lg"> </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--footer-->
+  <table class="table bg-light" border="0">
+    <tbody>
+      <tr>
+        <td rowspan="3">
+          <div class="bg-light text-dark">
+            <div class="copyright-container container">
+              <div class="copyright-left"> © Robotnik. All rights reserved </div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="bg-light text-dark">
+            <div class="menu-legal-en-container ">
+              <ul id="menu-legal-en" class="menu">
+                <li id="menu-item-8270" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-8270">
+                  <a href="https://www.robotnik.eu/legal-notice/">Legal notice</a>
+                </li>
+                <li id="menu-item-8271" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-8271">
+                  <a href="https://www.robotnik.eu/privacy-policy/">Privacy policy</a>
+                </li>
+                <li id="menu-item-8281" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-8281">
+                  <a href="https://www.robotnik.eu/politica-de-empresa/">Corporate policy</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="clear"></div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+
+</html>

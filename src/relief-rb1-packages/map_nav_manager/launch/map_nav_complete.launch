@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+  <include file="$(find map_nav_manager)/launch/servers.launch"/>
+
+	<arg name="use_rlc"         default="false"/>
+  <arg name="map_nav_config"  default="$(find map_nav_manager)/config/map_nav_manager.yaml"/>
+	
+  <include file="$(find map_nav_manager)/launch/map_nav_manager.launch">
+		<arg name="global_frame_id" value="map"/>
+		<arg name="use_rlc"         value="$(arg use_rlc)"/>
+    <arg name="map_nav_config"  value="$(arg map_nav_config)"/>
+	</include>
+
+</launch>

@@ -1,0 +1,130 @@
+#max_obstacle_height: 2.00  # assume something like an arm is mounted on top of the robot
+
+# Obstacle Cost Shaping (http://wiki.ros.org/costmap_2d/hydro/inflation)
+#robot_radius: 0.20  # distance a circular robot should be clear of the obstacle (kobuki: 0.18)
+# footprint: [[x0, y0], [x1, y1], ... [xn, yn]]  # if the robot is not circular
+
+map_type: costmap
+#map_type: voxel
+transform_tolerance: 0.1
+footprint_padding: 0.001
+#lethal_cost_threshold: 100
+lethal_cost_threshold: 253
+unknown_cost_value: 255
+always_send_full_costmap: true
+
+obstacle_layer:
+  enabled:              true
+  #max_obstacle_height:  0.6
+  origin_z:             0.0
+  z_resolution:         0.025
+  z_voxels:             100
+  unknown_threshold:    15
+  mark_threshold:       0
+  combination_method:   1
+  track_unknown_space:  true    #true needed for disabling global path planning through unknown space
+  footprint_clearing_enabled: true
+  obstacle_range: 10.0
+  raytrace_range: 40.0
+  publish_voxel_map: true
+  observation_sources: scan
+  scan:
+    data_type: LaserScan
+    sensor_frame: base_laser_link
+    topic: scan
+    marking: true
+    clearing: true
+    min_obstacle_height: 0.0
+    max_obstacle_height: 0.6
+
+#https://answers.ros.org/question/274112/min_obstacle_height-for-obstacle-costmap/
+#front_vertical_obstacle_layer:
+  #enabled:             true
+  ##max_obstacle_height:  0.6
+  ##origin_z:             0.0 # see also https://foxypanda.me/clearing-local-costmap-in-ros-with-pointcloud2/ (Step 1: Getting the obstacle height right; origin_z conf)
+  #z_resolution:         0.025
+  #z_voxels:             100
+  #unknown_threshold:    15
+  #mark_threshold:       0
+  #combination_method:   1
+  #track_unknown_space:  true    #true needed for disabling global path planning through unknown space
+  #footprint_clearing_enabled: true
+  #obstacle_range: 1.0
+  #raytrace_range: 2.0
+  #publish_voxel_map: true
+  #observation_sources: front_rgbd_camera
+  #front_rgbd_camera:
+    #data_type: PointCloud2
+    ##sensor_frame: front_rgbd_camera_depth_optical_frame
+    ##topic: front_rgbd_camera/depth/points
+    #marking: true
+    #clearing: true
+    #min_obstacle_height: 0.03
+    ##max_obstacle_height: 0.30
+
+# https://github.com/SteveMacenski/spatio_temporal_voxel_layer
+front_rgbd_obstacle_layer:
+  enabled:               true
+  voxel_decay:           0      # seconds if linear, e^n if exponential
+  decay_model:           -1     # 0=linear, 1=exponential, -1=persistent
+  voxel_size:            0.05   # meters
+  track_unknown_space:   true   # default space is unknown
+  observation_persistence: 0.0  # seconds
+  #max_obstacle_height:   2.0   # meters
+  unknown_threshold:     15     # voxel height
+  mark_threshold:        0      # voxel height
+  update_footprint_enabled: true
+  combination_method:    1      # 1=max, 0=override
+  obstacle_range:        2.0    # meters
+  #origin_z:              0.0   # meters
+  publish_voxel_map:     true   # default off
+  transform_tolerance:   0.2    # seconds
+  mapping_mode:          false  # default off, saves map not for navigation
+  map_save_duration:     60     # default 60s, how often to autosave
+  observation_sources:   front_rgbd1_clear front_rgbd1_mark
+  front_rgbd1_mark:
+    data_type: PointCloud2
+    topic: front_rgbd_camera/depth/points
+    sensor_frame: front_rgbd_camera_depth_optical_frame
+    marking: true
+    clearing: false
+    min_obstacle_height: 0.0     # default 0, meters
+    #max_obstacle_height: 2.0    # default 3, meters
+    expected_update_rate: 0.0    # default 0, if not updating at this rate at least, remove from buffer
+    observation_persistence: 0.0 # default 0, use all measurements taken during now-value, 0=latest
+    inf_is_valid: false          # default false, for laser scans
+    clear_after_reading: true    # default false, clear the buffer after the layer gets readings from it
+    #filter: "voxel"             # default passthrough, apply "voxel", "passthrough", or no filter to sensor data, recommended to have at one filter on
+    voxel_filter: true
+    voxel_min_points: 100        # default 0, minimum points per voxel for voxel filter
+    model_type: 0
+  front_rgbd1_clear:
+    enabled: true                # default true, can be toggled on/off with associated service call
+    data_type: PointCloud2
+    topic: front_rgbd_camera/depth/points
+    sensor_frame: front_rgbd_camera_depth_optical_frame
+    marking: false
+    clearing: true
+    min_z: 0.0                   # default 0, meters
+    max_z: 2.0                   # default 10, meters
+    vertical_fov_angle: 0.86     # default 0.7, radians
+    horizontal_fov_angle: 1.04   # default 1.04, radians
+    decay_acceleration: 10.0     # default 0, 1/s^2. If laser scanner MUST be 0
+    model_type: 0                # default 0 (depth camera). Use 1 for 3D Lidar
+    voxel_filter: true
+    voxel_min_points: 0
+    clear_after_reading: true
+
+
+# Global costmap is generated by inflating the obstacles on the map provided to
+# the navigation stack. Local costmap is generated by inflating obstacles
+# detected by the robot’s sensors in real time.
+# cost_scaling_factor and inflation_radius were now moved to the inflation_layer ns
+inflation_layer:
+  enabled:              true
+  cost_scaling_factor:  5.0  # exponential rate at which the obstacle cost drops off (default: 10)
+  #inflation_radius:     0.2  # max. distance from an obstacle at which costs are incurred for planning paths.
+
+static_layer:
+  enabled:              true
+  map_topic:            "map"

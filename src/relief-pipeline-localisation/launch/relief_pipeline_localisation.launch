@@ -1,0 +1,49 @@
+<launch>
+
+  <arg name="robot_type"              value="$(env ROBOT_TYPE)" />
+  <arg name="gazebo_world" />
+
+  <arg name="map_resolution"          value="0.01"                if="$(eval gazebo_world == 'corridor')" />
+  <arg name="map_resolution"          value="0.05"                if="$(eval gazebo_world == 'willowgarage')" />
+  <arg name="map_resolution"          value="0.025"               if="$(eval gazebo_world == 'square')" />
+  <arg name="map_resolution"          value="0.01"                if="$(eval gazebo_world == 'rectangle')" />
+  <arg name="map_resolution"          value="0.025"               if="$(eval gazebo_world == 'rectangle_long')" />
+  <arg name="map_resolution"          value="0.025"               if="$(eval gazebo_world == 'triangle')" />
+  <arg name="map_resolution"          value="0.025"               if="$(eval gazebo_world == 'gamma')" />
+  <arg name="map_resolution"          value="0.01"                if="$(eval gazebo_world == 'home_karto')" />
+  <arg name="map_resolution"          value="0.01"                if="$(eval gazebo_world == 'warehouse_karto')" />
+  <arg name="map_resolution"          value="0.01"                if="$(eval gazebo_world == 'cylinder')" />
+  <arg name="map_resolution"          value="0.01"                if="$(eval gazebo_world == 'csal_20201013')" />
+  <arg name="map_resolution"          value="0.01"                if="$(eval gazebo_world == 'temp_thmmy_lib3')" />
+  <arg name="map_resolution"          value="0.01"                if="$(eval gazebo_world == 'thmmy_lib_rb1')" />
+  <arg name="map_directory"           value="$(find relief_devel)/maps" />
+
+  <!-- Launch node pipeline_localiser_node -->
+  <node pkg="relief_pipeline_localisation" type="relief_pipeline_localisation_node" name="relief_pipeline_localisation_node" output="screen">
+
+    <!-- General params -->
+    <rosparam command="load" file="$(find relief_pipeline_localisation)/configuration_files/pipeline_general.yaml" />
+
+    <!-- CSM parameters -->
+    <rosparam command="load" file="$(find relief_pipeline_localisation)/configuration_files/pipeline_csm.yaml" />
+
+    <!-- ICP parameters -->
+    <rosparam command="load" file="$(find relief_pipeline_localisation)/configuration_files/pipeline_icp.yaml" />
+
+    <!-- DFT parameters -->
+    <rosparam command="load" file="$(find relief_pipeline_localisation)/configuration_files/pipeline_dft.yaml" />
+
+
+    <param name="map_png_file"        value="$(arg map_directory)/$(arg gazebo_world)_$(arg map_resolution).png" />
+
+    <param name="scan_topic"          value="scan"                        if="$(eval robot_type == 'turtlebot')" />
+    <param name="odom_topic"          value="odom"                        if="$(eval robot_type == 'turtlebot')" />
+    <param name="laser_z_orientation" value="upwards"                     if="$(eval robot_type == 'turtlebot')" />
+
+    <param name="scan_topic"          value="front_laser/scan"            if="$(eval robot_type == 'rb1')" />
+    <param name="odom_topic"          value="robotnik_base_control/odom"  if="$(eval robot_type == 'rb1')" />
+    <param name="laser_z_orientation" value="downwards"                   if="$(eval robot_type == 'rb1')" />
+
+  </node>
+
+</launch>

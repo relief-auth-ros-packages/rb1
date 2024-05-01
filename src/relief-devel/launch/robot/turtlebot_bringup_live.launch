@@ -1,0 +1,9 @@
+<launch>
+
+  <arg name="num_cameras" default="$(env NUM_CAMERAS)" />
+
+  <include file="$(find relief_turtlebot_bringup)/launch/minimal.launch">
+    <arg name="num_cameras" value="$(arg num_cameras)"/>
+  </include>
+
+</launch>

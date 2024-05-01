@@ -1,0 +1,9 @@
+<library path="lib/librb1_base_controller">
+
+  <class name="rb1_base_controller/RB1BaseController" type="rb1_base_controller::RB1BaseController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      The RB1 Base Controller controls 2 wheel mobile platforms. It expects 2 VelocityJointInterface type of hardware interfaces.
+    </description>
+  </class>
+
+</library>

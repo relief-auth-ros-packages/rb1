@@ -1,0 +1,32 @@
+<launch>
+  <!-- World file -->
+  <arg name="gazebo_gui"/>
+  <arg name="gazebo_world" />
+
+  <arg name="world_file"  default="$(find relief_devel)/worlds/willowgarage.world"               if="$(eval gazebo_world == 'willowgarage')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/corridor.world"                   if="$(eval gazebo_world == 'corridor')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/corridor.world"                   if="$(eval gazebo_world == 'corridor_rtabmap')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/square.sdf"                       if="$(eval gazebo_world == 'square')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/rectangle.sdf"                    if="$(eval gazebo_world == 'rectangle')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/rectangle_long.sdf"               if="$(eval gazebo_world == 'rectangle_long')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/triangle.sdf"                     if="$(eval gazebo_world == 'triangle')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/gamma.sdf"                        if="$(eval gazebo_world == 'gamma')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/home_test.world"                  if="$(eval gazebo_world == 'home_karto')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/warehouse.world"                  if="$(eval gazebo_world == 'warehouse_karto')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/cylinder_world.world"             if="$(eval gazebo_world == 'cylinder')"/>
+
+  <arg name="world_file"  default="$(find relief_devel)/worlds/willowgarage.world"               if="$(eval gazebo_world == 'fmt_willowgarage')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/corridor.world"                   if="$(eval gazebo_world == 'fmt_corridor')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/home_test.world"                  if="$(eval gazebo_world == 'fmt_home_karto')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/home_test.world"                  if="$(eval gazebo_world == 'fmt_home_karto2')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/home_test.world"                  if="$(eval gazebo_world == 'fmt_home_karto3')"/>
+  <arg name="world_file"  default="$(find relief_devel)/worlds/warehouse.world"                  if="$(eval gazebo_world == 'fmt_warehouse_karto')"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="use_sim_time"  value="true"/>
+    <arg name="debug"         value="false"/>
+    <arg name="gui"           value="$(arg gazebo_gui)" />
+    <arg name="verbose"       value="true" />
+    <arg name="world_name"    value="$(arg world_file)"/>
+  </include>
+</launch>

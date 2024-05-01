@@ -1,0 +1,19 @@
+local_costmap:
+  global_frame: /odom
+  robot_base_frame: /base_footprint
+  update_frequency: 5.0
+  publish_frequency: 5.0
+  transform_tolerance: 0.5
+  static_map: false
+  rolling_window: true
+  width: 4.0
+  height: 4.0
+  #resolution: 0.025
+  #origin_x: 0.0
+  #origin_y: 0.0
+  plugins:
+    - {name: static_layer,                    type: "costmap_2d::StaticLayer"}
+    - {name: obstacle_layer,                  type: "costmap_2d::ObstacleLayer"}
+   #- {name: front_vertical_obstacle_layer,   type: "costmap_2d::VoxelLayer"}
+    - {name: front_rgbd_obstacle_layer,       type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
+    - {name: inflation_layer,                 type: "costmap_2d::InflationLayer"}

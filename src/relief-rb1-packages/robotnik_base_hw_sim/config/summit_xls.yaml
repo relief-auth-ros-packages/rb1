@@ -1,0 +1,20 @@
+motors:  
+  m1:
+    joint: summit_xl_a_back_left_joint
+    can_id: 1
+  m2:
+    joint: summit_xl_a_back_right_joint
+    can_id: 2
+  m3:
+    joint: summit_xl_a_front_left_joint
+    can_id: 3
+  m4:
+    joint: summit_xl_a_front_right_joint
+    can_id: 4
+battery_voltage: 51
+battery_amperes: 15
+battery_alarm_voltage: 48.5
+num_inputs_per_driver: 5
+num_outputs_per_driver: 3
+# A/h (to simulate battery discharge)
+power_consumption: 2

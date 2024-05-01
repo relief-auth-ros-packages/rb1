@@ -1,0 +1,17 @@
+<launch>
+  <arg name="sensor_range" default="2.0"/>
+  <arg name="task" />
+
+  <node pkg="frontier_exploration" type="explore_client" name="explore_client" output="screen"/>
+  <node pkg="frontier_exploration" type="explore_server" name="explore_server" output="screen" >
+    <!-- When frequency > 0.0, ~goal_aliasing is the required distance delta
+         between the last goal and a new goal, before the new goal is submitted
+         to move_base. It is safe to set to anywhere within
+         sensor_range/2 > ~goal_aliasing > 0.0, and this parameter will reduce
+         the amount of redundant goals sent during 'smooth' exploration. -->
+    <param name="frequency" type="double" value="2.0"/>
+    <param name="goal_aliasing" type="double" value="$(arg sensor_range)"/>
+    <rosparam ns="explore_costmap" file="$(find relief_devel)/configuration_files/common/frontier_exploration_params/frontier_exploration_params.yaml"                              subst_value="true" command="load" />
+    <rosparam ns="explore_costmap" file="$(find relief_devel)/configuration_files/$(arg task)/$(arg task)_frontier_exploration_params/$(arg task)_frontier_exploration_params.yaml" subst_value="true" command="load" />
+  </node>
+</launch>

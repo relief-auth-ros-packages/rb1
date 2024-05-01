@@ -1,0 +1,7 @@
+float32 gearboxReduction
+float32 diameterWheel
+bool motionOdometry
+bool motorsEncoder
+int32  motorsEncoderFactor
+---
+bool ret 

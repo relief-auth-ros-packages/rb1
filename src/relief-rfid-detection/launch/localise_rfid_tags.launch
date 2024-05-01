@@ -1,0 +1,45 @@
+<launch>
+
+  <arg name="robot_type" value="$(env ROBOT_TYPE)" />
+  <arg name="rfid_antennas_poses_param_file" value="$(find relief_rfid_detection)/params/$(arg robot_type)_antennas_poses_filelist.yaml" />
+  <arg name="rfid_measurements_param_file"   value="$(find relief_rfid_detection)/params/$(arg robot_type)_measurements_filelist.yaml" />
+  <arg name="furniture_coords_storage_file"  value="$(find relief_rfid_detection)/params/furniture_coords_storage_file.txt" />
+
+  <!-- Maximum and minimum allowed velocity; increment by which the translational velocity is modified -->
+  <arg name="max_trans_velocity"             value="0.20" />
+  <arg name="min_trans_velocity"             value="0.05" />
+  <arg name="inc_trans_velocity"             value="0.01" />
+
+  <node name="rfid_localisation_node" type="rfid_localisation_node.py" pkg="relief_rfid_detection" output="screen">
+
+    <rosparam param="callback_frequency">
+      1.0
+    </rosparam>
+
+    <rosparam param="rfid_locations" subst_value="True">
+      "$(find relief_rfid_detection)/results/rfid_locations.txt"
+    </rosparam>
+
+    <rosparam param="tags_infos" subst_value="True">
+      "$(find relief_rfid_detection)/rfid_localisation/Tags_Infos.txt"
+    </rosparam>
+
+    <rosparam param="robot_velocity" subst_value="True">
+      "$(find relief_rfid_antennas_poses_logger)/results/velocities.txt"
+    </rosparam>
+
+    <rosparam param="furniture_coords_storage_file" subst_value="True">
+      "$(arg furniture_coords_storage_file)"
+    </rosparam>
+
+    <rosparam file="$(arg rfid_antennas_poses_param_file)" command="load"/>
+    <rosparam file="$(arg rfid_measurements_param_file)"   command="load"/>
+
+    <param name="max_trans_velocity" value="$(arg max_trans_velocity)" />
+    <param name="min_trans_velocity" value="$(arg min_trans_velocity)" />
+    <param name="inc_trans_velocity" value="$(arg inc_trans_velocity)" />
+
+
+  </node>
+
+</launch>

@@ -1,0 +1,9 @@
+<library path="lib/libwaypoint_mapping_plugin">
+  <class name="waypoint_mapping_plugin/WaypointMapping"
+         type="waypoint_mapping_plugin::WaypointMappingTool"
+         base_class_type="rviz::Tool">
+    <description>
+      Tool for starting/stopping mapping in rviz
+    </description>
+  </class>
+</library>
